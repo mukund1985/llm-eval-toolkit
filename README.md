@@ -19,10 +19,29 @@ This toolkit provides the metric primitives and pipeline infrastructure for that
 
 ---
 
+## Production Failure Modes Covered
+
+This toolkit detects the failure modes that matter in production — not the ones that show up on benchmarks.
+
+| Failure Mode | Module | What It Detects |
+|---|---|---|
+| **Distribution Collapse** | `diversity.py` | Output entropy collapse, intra-session diversity loss, repeat rate spikes — catches the failure where metrics look healthy but users see repetitive outputs |
+| **Tool Failure Cascade** | `reliability.py` | Silent degradation via availability-truth decoupling — tool returns schema-valid stale/partial data, system proceeds confidently with wrong inputs |
+| **Cascading Decision Error** | `cascade.py` | Coherence illusion in multi-step pipelines — incorrect early decision propagates, each step adds evidence making output look internally consistent but be systematically wrong |
+| **Explanation-Decision Decoupling** | `perturbation.py` | Post-hoc attribution proxy errors — model correct, explanation wrong; perturbation consistency checks catch SHAP citing proxy features rather than causal signals |
+| **Semantic Consistency** | `consistency.py` | Output instability under paraphrase |
+| **Response Drift** | `drift.py` | Temporal semantic drift, baseline deviation |
+| **Factual Grounding** | `factual_grounding.py` | Claim-level grounding against reference corpus |
+| **Hallucination** | `hallucination.py` | Unsupported claim detection |
+
 ## Metrics
 
 | Metric | What it measures | Primary use case |
 |---|---|---|
+| **Diversity** | Output entropy, intra-session diversity, repeat rate | Distribution collapse detection |
+| **Reliability** | Tool call state tracking, partial-response rate, latency-drift correlation | Silent degradation in tool-augmented agents |
+| **Perturbation** | Attribution-perturbation consistency score | Explanation validity in regulated/auditable systems |
+| **Cascade** | Uncertainty propagation across pipeline steps | Multi-step agent coherence illusion detection |
 | **Consistency** | Semantic stability across paraphrased prompts | Prompt-surface sensitivity testing |
 | **Factual Grounding** | Sentence-level coverage against a reference corpus | RAG pipeline quality, knowledge grounding |
 | **Explainability** | Reasoning chain quality relative to a conclusion | Agentic decision audit, CoT evaluation |
@@ -123,6 +142,10 @@ The pipeline is async-first (`asyncio.gather` under the hood), runs the sync eva
 llm_eval/
 ├── metrics/
 │   ├── base.py               # MetricResult dataclass, BaseMetric ABC
+│   ├── diversity.py          # Entropy, intra-session diversity, repeat rate (FM-3)
+│   ├── reliability.py        # Tool call state tracking, partial-response rate (FM-2)
+│   ├── perturbation.py       # Attribution-perturbation consistency checker (FM-5)
+│   ├── cascade.py            # Uncertainty propagation across pipeline steps (FM-1)
 │   ├── consistency.py        # Pairwise cosine similarity over paraphrases
 │   ├── factual_grounding.py  # Sentence-to-chunk alignment vs. reference
 │   ├── explainability.py     # Causal density + alignment + step coverage
@@ -185,6 +208,17 @@ Contributions are welcome. Areas where the toolkit would benefit most:
 - **Calibration tooling** — threshold tuning against human-labelled datasets
 
 Please open an issue before submitting a large PR.
+
+---
+
+## Research
+
+This toolkit is the reference implementation for:
+
+> *Evaluating Agentic AI in the Wild: Failure Modes, Drift Patterns, and a Production Evaluation Framework*
+> Mukund Pandey — preprint forthcoming
+
+The failure modes and detection methods are grounded in production observations from systems operating at billion-event scale. If you are working on agentic evaluation, LLM observability, or AI safety in production systems, contributions and issue reports are welcome.
 
 ---
 
