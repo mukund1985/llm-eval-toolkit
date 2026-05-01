@@ -215,8 +215,20 @@ Please open an issue before submitting a large PR.
 
 This toolkit is the reference implementation for:
 
-> *Evaluating Agentic AI in the Wild: Failure Modes, Drift Patterns, and a Production Evaluation Framework*
-> Mukund Pandey — preprint forthcoming
+**[Evaluating Agentic AI in the Wild: Failure Modes, Drift Patterns, and a Production Evaluation Framework](https://doi.org/10.5281/zenodo.19947138)**
+Mukund Pandey — Published May 2026
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19947138.svg)](https://doi.org/10.5281/zenodo.19947138)
+
+The paper identifies 7 failure modes in production agentic AI systems and introduces PAEF (Production Agentic Evaluation Framework):
+
+1. **Cascade Uncertainty Amplification** — errors compound silently across multi-step pipelines
+2. **Tool Degradation with Availability Masking** — tools degrade while availability signals stay green
+3. **Distribution Collapse** — agents narrow output diversity over time
+4. **Cross-Session Consistency Drift** — responses drift across sessions for identical inputs
+5. **Explanation-Decision Decoupling** — attribution explanations detach from actual decisions
+6. **Latency-Correctness Trade-off Inversion** — faster responses become less accurate
+7. **Proxy Goal Convergence** — agents optimise for measurable proxies, not real objectives
 
 The failure modes and detection methods are grounded in production observations from systems operating at billion-event scale. If you are working on agentic evaluation, LLM observability, or AI safety in production systems, contributions and issue reports are welcome.
 
