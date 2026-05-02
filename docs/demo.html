@@ -478,6 +478,67 @@
     .verdict.healthy h4 .v-tag { background: var(--success); }
     .verdict p { font-size: 0.92rem; color: var(--text); }
 
+    /* How-to banner */
+    .howto {
+      background: linear-gradient(135deg, rgba(88,166,255,0.10), rgba(63,185,80,0.08));
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem 1.1rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      gap: 1.25rem;
+      align-items: stretch;
+      flex-wrap: wrap;
+    }
+    .howto-step {
+      flex: 1 1 220px;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      font-size: 0.88rem;
+      color: var(--text);
+    }
+    .howto-num {
+      flex: 0 0 26px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: var(--bg);
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 0.82rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .howto-text strong { color: var(--accent); }
+    .howto-text-line {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 0.15rem;
+    }
+
+    .watch-for {
+      background: rgba(210,153,34,0.10);
+      border-left: 3px solid var(--warn);
+      padding: 0.6rem 0.9rem;
+      border-radius: 4px;
+      font-size: 0.88rem;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+    }
+    .watch-for strong { color: var(--warn); }
+
+    .verdict-takeaway {
+      margin-top: 0.9rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid rgba(255,255,255,0.10);
+      font-size: 0.86rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
     .placeholder {
       text-align: center;
       padding: 3rem 1rem;
@@ -557,8 +618,34 @@
 
     <!-- Main panel -->
     <section class="panel">
+
+      <div class="howto" aria-label="How to use this demo">
+        <div class="howto-step">
+          <span class="howto-num">1</span>
+          <div class="howto-text">
+            <strong>Pick a scenario</strong>
+            <div class="howto-text-line">Each one is a real production failure mode from the paper.</div>
+          </div>
+        </div>
+        <div class="howto-step">
+          <span class="howto-num">2</span>
+          <div class="howto-text">
+            <strong>Click Run PAEF Analysis</strong>
+            <div class="howto-text-line">Scores compute live in your browser — no backend.</div>
+          </div>
+        </div>
+        <div class="howto-step">
+          <span class="howto-num">3</span>
+          <div class="howto-text">
+            <strong>Watch the gap</strong>
+            <div class="howto-text-line">Standard metrics (ROUGE, BERTScore, AUC, AgentBench, MT-Bench) miss it. PAEF catches it.</div>
+          </div>
+        </div>
+      </div>
+
       <h2 id="scenarioTitle">FM-3 — Distribution Collapse</h2>
       <p class="scenario-desc" id="scenarioDesc"></p>
+      <p class="watch-for" id="watchFor"></p>
 
       <div class="viz-card">
         <h3>Visualisation</h3>
@@ -589,6 +676,7 @@
       <div class="verdict" id="verdict">
         <h4 id="verdictTitle"><span class="v-tag">FAILURE DETECTED</span><span id="verdictName"></span></h4>
         <p id="verdictBody"></p>
+        <div class="verdict-takeaway" id="verdictTakeaway"></div>
       </div>
     </section>
 
@@ -604,6 +692,7 @@ const SCENARIOS = {
   fm3: {
     title: 'FM-3 — Distribution Collapse',
     desc: 'Agents converge on a narrow set of high-scoring patterns. Aggregate accuracy stays flat while diversity collapses. Standard monitoring would never alert.',
+    watchFor: 'Watch the bar chart shrink from 20 categories to 3 as you step W1 → W5. Accuracy stays at 0.86–0.88 the whole time, but PAEF\'s diversity score collapses 6.5×.',
     paramLabel: 'Window',
     options: [
       { value: 'W1', label: 'W1 — healthy' },
@@ -624,6 +713,7 @@ const SCENARIOS = {
   fm2: {
     title: 'FM-2 — Silent Tool Degradation',
     desc: 'A tool returns schema-valid responses from stale cache or partial defaults. Logs show no failures; downstream logic proceeds at full confidence. Standard monitoring sees only −0.03 accuracy across all four stages.',
+    watchFor: 'Watch the tool-call grid fill with yellow ("partial / stale-cache") cells as you step Stage 1 → 4. Accuracy moves only −0.03 total, but PAEF\'s reliability score crashes from 0.94 → 0.11.',
     paramLabel: 'Stage',
     options: [
       { value: 'S1', label: 'Stage 1 — baseline' },
@@ -642,6 +732,7 @@ const SCENARIOS = {
   fm1: {
     title: 'FM-1 — Cascade Uncertainty (Coherence Illusion)',
     desc: 'A low-confidence early step feeds high-confidence downstream output. Per-step accuracy checks would pass; the pipeline is internally certain and externally wrong.',
+    watchFor: 'Watch one pipeline step turn red (confidence ~0.30) while every step downstream stays amber-confident (~0.87). Per-step accuracy checks pass; PAEF\'s illusion score still flags 0.875.',
     paramLabel: 'Variant',
     options: [
       { value: 'healthy', label: 'Healthy pipeline' },
@@ -661,6 +752,7 @@ const SCENARIOS = {
   fm5: {
     title: 'FM-5 — Explanation Decoupling',
     desc: 'Correct decision, incorrect explanation. Post-hoc attribution highlights a proxy feature, not the true causal signal. Accuracy is identical across cases — only PAEF separates them.',
+    watchFor: 'Compare the "Claimed Attribution" vs "Actual Perturbation Impact" bars. When the SHAP proxy ranks geography_risk_score #1, the bars turn red — accuracy is unchanged but PAEF drops 0.907 → 0.357.',
     paramLabel: 'Case',
     options: [
       { value: 'correct', label: 'Correct (causal ranking)' },
@@ -732,6 +824,7 @@ function onScenarioChange() {
   const s = SCENARIOS[currentScenario];
   $('scenarioTitle').textContent = s.title;
   $('scenarioDesc').textContent = s.desc;
+  $('watchFor').innerHTML = '<strong>What to watch for:</strong> ' + s.watchFor;
   $('paramLabel').textContent = s.paramLabel;
 
   const sel = $('paramSelect');
@@ -1156,6 +1249,9 @@ async function runAnalysis() {
   const v = verdictFor();
   $('verdictName').textContent = v.name;
   $('verdictBody').textContent = v.body;
+  $('verdictTakeaway').textContent = v.healthy
+    ? 'The takeaway: PAEF agrees with standard metrics in healthy cases — it only fires when something real has changed.'
+    : 'The takeaway: this is the paper\'s central finding — standard ML metrics don\'t just underperform on agentic systems, they\'re structurally blind to entire failure classes. PAEF closes that gap.';
   const verdictEl = $('verdict');
   const tag = verdictEl.querySelector('.v-tag');
   if (v.healthy) {
