@@ -57,6 +57,81 @@
   <style>
     body { font-family: 'Inter', sans-serif; }
 
+    /* Sticky page navigation */
+    .page-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: saturate(180%) blur(8px);
+      -webkit-backdrop-filter: saturate(180%) blur(8px);
+      border-bottom: 1px solid #e5e7eb;
+      height: 50px;
+      display: flex;
+      align-items: center;
+    }
+    .page-nav-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 0 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+    .page-nav-brand {
+      font-weight: 800;
+      color: #1e3a8a;
+      font-size: 0.95rem;
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      flex: 0 0 auto;
+    }
+    .page-nav-brand:hover { color: #2563eb; }
+    .page-nav-links {
+      display: flex;
+      gap: 1.1rem;
+      flex: 1 1 auto;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .page-nav-links::-webkit-scrollbar { display: none; }
+    .page-nav-links a {
+      color: #4b5563;
+      text-decoration: none;
+      font-size: 0.86rem;
+      white-space: nowrap;
+      padding: 0.4rem 0;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .page-nav-links a:hover { color: #2563eb; }
+    .page-nav-links a.active {
+      color: #2563eb;
+      border-bottom-color: #2563eb;
+      font-weight: 600;
+    }
+    .page-nav-cta { display: flex; gap: 0.85rem; flex: 0 0 auto; }
+    .page-nav-cta a {
+      color: #4b5563;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: color 0.15s ease;
+    }
+    .page-nav-cta a:hover { color: #2563eb; }
+
+    /* Anchor offset so sticky navbar doesn't hide section headings */
+    :where(#abstract, #architecture, #failure-modes, #framework, #results,
+           #examples, #try-it, #BibTeX) {
+      scroll-margin-top: 60px;
+    }
+
+    @media (max-width: 600px) {
+      .page-nav-brand { display: none; }
+      .page-nav-cta { display: none; }
+      .page-nav-inner { padding: 0 0.75rem; gap: 0.75rem; }
+    }
+
     .tldr-callout {
       border-left: 4px solid #2563eb;
       background: #eff6ff;
@@ -671,6 +746,27 @@
   </style>
 </head>
 <body>
+  <!-- Sticky page navigation -->
+  <nav class="page-nav" id="pageNav" aria-label="In-page section navigation">
+    <div class="page-nav-inner">
+      <a href="#" class="page-nav-brand" aria-label="Top of page">PAEF</a>
+      <div class="page-nav-links" id="pageNavLinks">
+        <a href="#abstract">Abstract</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#failure-modes">Failure Modes</a>
+        <a href="#framework">Framework</a>
+        <a href="#results">Results</a>
+        <a href="#examples">Examples</a>
+        <a href="#try-it">Demo</a>
+        <a href="#BibTeX">BibTeX</a>
+      </div>
+      <div class="page-nav-cta">
+        <a href="paper.pdf" target="_blank" title="Paper PDF" aria-label="Paper PDF"><i class="fas fa-file-pdf"></i></a>
+        <a href="https://github.com/mukund1985/llm-eval-toolkit" target="_blank" title="Code repository" aria-label="GitHub repository"><i class="fab fa-github"></i></a>
+      </div>
+    </div>
+  </nav>
+
   <main id="main-content">
 
   <!-- Hero -->
@@ -780,7 +876,7 @@
   </section>
 
   <!-- Abstract -->
-  <section class="section hero is-light">
+  <section class="section hero is-light" id="abstract">
     <div class="container is-max-desktop">
       <div class="columns is-centered has-text-centered">
         <div class="column is-four-fifths">
@@ -816,7 +912,7 @@
   </section>
 
   <!-- PAEF Architecture -->
-  <section class="section">
+  <section class="section" id="architecture">
     <div class="container is-max-desktop">
       <div class="columns is-centered">
         <div class="column">
@@ -961,7 +1057,7 @@
   </section>
 
   <!-- Seven Failure Modes -->
-  <section class="section hero is-light">
+  <section class="section hero is-light" id="failure-modes">
     <div class="container is-max-desktop">
       <h2 class="title is-3 has-text-centered">Seven Production Failure Modes</h2>
       <p class="has-text-centered has-text-grey is-size-6" style="margin-bottom: 1.5rem;">
@@ -1107,7 +1203,7 @@
   </section>
 
   <!-- PAEF Five-Dimension Framework -->
-  <section class="section hero is-light">
+  <section class="section hero is-light" id="framework">
     <div class="container is-max-desktop">
       <h2 class="title is-3 has-text-centered">PAEF: Five-Dimension Framework</h2>
 
@@ -1231,7 +1327,7 @@
   </section>
 
   <!-- Experimental Results -->
-  <section class="section">
+  <section class="section" id="results">
     <div class="container is-max-desktop">
       <h2 class="title is-3 has-text-centered">Experimental Results</h2>
       <p class="has-text-centered has-text-grey is-size-6" style="margin-bottom: 1.5rem;">
@@ -1385,7 +1481,7 @@
   </section>
 
   <!-- Worked Examples -->
-  <section class="section">
+  <section class="section" id="examples">
     <div class="container is-max-desktop">
       <h2 class="title is-3 has-text-centered">Worked Examples — End-to-End Traces</h2>
       <p class="has-text-centered has-text-grey is-size-6" style="margin-bottom: 1.5rem;">
@@ -1533,6 +1629,36 @@
   </main>
 
   <script>
+    // Highlight the active section in the sticky navbar as you scroll.
+    (function () {
+      const links = Array.from(document.querySelectorAll('.page-nav-links a'));
+      const map = new Map();
+      links.forEach(a => {
+        const href = a.getAttribute('href');
+        if (href && href.startsWith('#') && href.length > 1) {
+          const el = document.getElementById(href.slice(1));
+          if (el) map.set(el, a);
+        }
+      });
+      if (!('IntersectionObserver' in window) || map.size === 0) return;
+
+      const setActive = (link) => {
+        links.forEach(l => l.classList.remove('active'));
+        if (link) link.classList.add('active');
+      };
+
+      const obs = new IntersectionObserver((entries) => {
+        // Pick the entry nearest the top of the viewport (most-visible band).
+        const visible = entries.filter(e => e.isIntersecting);
+        if (visible.length === 0) return;
+        visible.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        const link = map.get(visible[0].target);
+        if (link) setActive(link);
+      }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+
+      map.forEach((_, section) => obs.observe(section));
+    })();
+
     function copyBibTeX() {
       const code = document.getElementById('bibtex-code').innerText;
       const btn = document.getElementById('copyBibTexBtn');
