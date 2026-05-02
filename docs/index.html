@@ -32,7 +32,7 @@
   <link rel="stylesheet" href="static/css/academicons.min.css">
   <link rel="stylesheet" href="static/css/index.css">
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <script defer src="static/js/fontawesome.all.min.js"></script>
   <script defer src="static/js/bulma-carousel.min.js"></script>
@@ -270,6 +270,26 @@
     .demo-cta-btn { background: #f59e0b !important; color: #ffffff !important; }
     .demo-cta-btn:hover { background: #d97706 !important; }
 
+    .demo-embed {
+      position: relative;
+      width: 100%;
+      height: 820px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #d1d5db;
+      box-shadow: 0 8px 30px -12px rgba(0,0,0,0.25);
+      background: #0d1117;
+    }
+    .demo-embed iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+    @media (max-width: 768px) {
+      .demo-embed { height: 1100px; }
+    }
+
     @media (max-width: 768px) {
       .arch-flow { font-size: 0.78rem; }
       .stat-card .stat-num { font-size: 1.9rem; }
@@ -337,9 +357,9 @@
                   </a>
                 </span>
 
-                <!-- Live Demo -->
+                <!-- Live Demo (in-page; full page also at demo.html) -->
                 <span class="link-block">
-                  <a href="demo.html"
+                  <a href="#try-it"
                      class="external-link button is-normal is-rounded demo-cta-btn">
                     <span class="icon"><i class="fas fa-play-circle"></i></span>
                     <span>Live Demo</span>
@@ -759,6 +779,25 @@
         <strong>Key finding:</strong> Accuracy is identical in all three cases. PAEF drops
         0.907 → 0.357 when the proxy is ranked first. Standard metrics cannot distinguish
         these cases.
+      </div>
+    </div>
+  </section>
+
+  <!-- Embedded interactive demo -->
+  <section class="section hero is-light" id="try-it">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">Try It — Interactive PAEF Demo</h2>
+      <p class="has-text-centered has-text-grey is-size-6" style="margin-bottom: 1.25rem;">
+        Pick a failure mode in the sidebar, choose a parameter, and click
+        <strong>Run PAEF Analysis</strong>. All computation runs in your browser using the
+        exact numbers from the experiments above.
+        Prefer the standalone view? Open <a href="demo.html" target="_blank">demo.html</a>.
+      </p>
+      <div class="demo-embed">
+        <iframe src="demo.html"
+                title="PAEF interactive demo"
+                loading="lazy"
+                allow="clipboard-write"></iframe>
       </div>
     </div>
   </section>
