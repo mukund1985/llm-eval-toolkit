@@ -270,6 +270,190 @@
     .demo-cta-btn { background: #f59e0b !important; color: #ffffff !important; }
     .demo-cta-btn:hover { background: #d97706 !important; }
 
+    /* Hero metric strip */
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      padding: 1.1rem 1.25rem;
+      background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+    }
+    .hero-metric {
+      text-align: center;
+      padding: 0.4rem;
+    }
+    .hero-metric .hm-num {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #1e3a8a;
+      line-height: 1;
+      margin-bottom: 0.35rem;
+      font-family: 'Inter', sans-serif;
+    }
+    .hero-metric .hm-label {
+      font-size: 0.78rem;
+      color: #4b5563;
+      line-height: 1.35;
+    }
+    @media (max-width: 600px) {
+      .hero-metric .hm-num { font-size: 1.5rem; }
+    }
+
+    /* Part headings (numbered architecture sub-sections) */
+    .part-heading {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #111827;
+      margin: 0 0 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .part-heading .part-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      background: #2563eb;
+      color: #ffffff;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      letter-spacing: 0.04em;
+    }
+    .part-desc {
+      color: #4b5563;
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      max-width: 760px;
+    }
+    .part-desc code {
+      background: #f3f4f6;
+      color: #1f2937;
+      padding: 0.05rem 0.35rem;
+      border-radius: 3px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+    }
+
+    /* Headline results matrix + overlay callouts */
+    .headline-wrap { position: relative; margin-bottom: 1rem; }
+    .headline-table th, .headline-table td { font-size: 0.92rem; }
+    .headline-table tbody td:first-child {
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: #2563eb;
+    }
+    .callout-overlays {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .callout-pill {
+      background: #ffffff;
+      border: 1px solid #2563eb;
+      border-left: 4px solid #2563eb;
+      border-radius: 6px;
+      padding: 0.7rem 0.95rem;
+      box-shadow: 0 4px 14px -8px rgba(37,99,235,0.45);
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .callout-pill .cp-num {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #1e40af;
+      font-family: 'Inter', sans-serif;
+    }
+    .callout-pill .cp-label {
+      font-size: 0.78rem;
+      color: #4b5563;
+      line-height: 1.3;
+    }
+
+    /* Worked Examples carousel */
+    .examples-rail {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 1rem;
+    }
+    @media (max-width: 800px) {
+      .examples-rail {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        gap: 0.85rem;
+        padding-bottom: 0.5rem;
+        -webkit-overflow-scrolling: touch;
+      }
+      .example-card {
+        min-width: 280px;
+        scroll-snap-align: start;
+      }
+    }
+    .example-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 1.1rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .example-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px -10px rgba(0,0,0,0.18);
+    }
+    .ex-header {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 0.6rem;
+    }
+    .ex-header .ex-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 0.18rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .ex-header h4 {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #111827;
+      margin: 0;
+      line-height: 1.25;
+    }
+    .ex-body { margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+    .ex-body dt {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #6b7280;
+      margin-bottom: 0.1rem;
+    }
+    .ex-body dd {
+      margin: 0 0 0.15rem 0;
+      font-size: 0.86rem;
+      color: #1f2937;
+      line-height: 1.4;
+    }
+    .ex-body code {
+      background: #f3f4f6;
+      padding: 0.05rem 0.3rem;
+      border-radius: 3px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+    }
+
     /* Detailed colourful architecture figure */
     .arch-figure {
       margin-top: 2rem;
@@ -521,6 +705,30 @@
     </div>
   </section>
 
+  <!-- Hero metric strip -->
+  <section class="section" style="padding-top: 0; padding-bottom: 1.25rem;">
+    <div class="container is-max-desktop">
+      <div class="hero-metrics">
+        <div class="hero-metric">
+          <div class="hm-num">4 / 7</div>
+          <div class="hm-label">failure modes invisible to standard metrics</div>
+        </div>
+        <div class="hero-metric">
+          <div class="hm-num">6.5×</div>
+          <div class="hm-label">diversity collapse while accuracy stays flat</div>
+        </div>
+        <div class="hero-metric">
+          <div class="hm-num">−0.03</div>
+          <div class="hm-label">accuracy drop standard monitoring sees in tool degradation</div>
+        </div>
+        <div class="hero-metric">
+          <div class="hm-num">0.875</div>
+          <div class="hm-label">coherence illusion score: internally certain, externally wrong</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Abstract -->
   <section class="section hero is-light">
     <div class="container is-max-desktop">
@@ -563,6 +771,19 @@
       <div class="columns is-centered">
         <div class="column">
           <h2 class="title is-3 has-text-centered">PAEF Architecture</h2>
+          <p class="has-text-centered has-text-grey is-size-6" style="margin-bottom: 1.5rem;">
+            Three parts: data flow, the five metric modules, and CI integration.
+          </p>
+
+          <!-- Part 1 -->
+          <h3 class="part-heading"><span class="part-num">Part 1</span> Data Flow &amp; Orchestration</h3>
+          <p class="part-desc">
+            An <code>EvalRequest</code> bundles agent output with reasoning trace, tool calls,
+            attributions, and pipeline-step confidences. The <code>LLMEvaluator</code> dispatches
+            it to the five metric modules in parallel, aggregates scores, and emits a single
+            <code>EvalReport</code>. No external API calls — all metrics run locally on
+            <code>sentence-transformers</code>.
+          </p>
 
           <div class="arch-diagram">
             <div class="arch-flow">
@@ -584,9 +805,13 @@
             </div>
           </div>
 
-          <p class="has-text-centered is-size-6 has-text-grey">
-            All metrics run locally on <code>sentence-transformers</code> — no external API
-            calls, no rate limits.
+          <!-- Part 2 -->
+          <h3 class="part-heading" style="margin-top: 2.25rem;"><span class="part-num">Part 2</span> The Five Metric Modules</h3>
+          <p class="part-desc">
+            Each module owns one or more failure-mode families and exposes a standard
+            <code>MetricResult</code> contract: a normalised score, a confidence estimate,
+            and structured metadata for downstream alerting. Detailed scoring is in the
+            <em>Five-Dimension Framework</em> section below.
           </p>
 
           <!-- Detailed colourful architecture figure -->
@@ -669,6 +894,16 @@
               </div>
             </div>
           </div>
+
+          <!-- Part 3 -->
+          <h3 class="part-heading" style="margin-top: 2.25rem;"><span class="part-num">Part 3</span> Reports &amp; CI Integration</h3>
+          <p class="part-desc">
+            <code>EvalReport</code> rolls up per-dimension scores plus a CI-friendly
+            <code>passed</code> flag against configurable thresholds, so PAEF drops into a
+            standard test runner and fails the build when a regression crosses the line.
+            Latency is tracked alongside scores so the cost of evaluation is visible in the
+            same artefact.
+          </p>
 
         </div>
       </div>
@@ -885,23 +1120,60 @@
   <section class="section">
     <div class="container is-max-desktop">
       <h2 class="title is-3 has-text-centered">Experimental Results</h2>
+      <p class="has-text-centered has-text-grey is-size-6" style="margin-bottom: 1.5rem;">
+        Headline matrix first; per-experiment detail tables below.
+      </p>
 
-      <div class="stat-grid">
-        <div class="stat-card">
-          <div class="stat-num">4 / 7</div>
-          <div class="stat-label">Failure modes completely undetected by any standard metric</div>
+      <!-- Headline results matrix with overlay callouts -->
+      <div class="headline-wrap">
+        <div style="overflow-x: auto;">
+          <table class="results-table headline-table">
+            <thead>
+              <tr>
+                <th style="text-align:left;">Experiment</th>
+                <th>Failure Mode</th>
+                <th>What standard monitoring sees</th>
+                <th>What PAEF sees</th>
+                <th>Detected</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>FM-3 Distribution Collapse</td>
+                <td>Accuracy flat at <strong>0.86–0.88</strong></td>
+                <td>Diversity collapses <strong>6.5×</strong>, repeat rate <strong>1.000</strong></td>
+                <td class="yes">✓</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>FM-2 Silent Tool Degradation</td>
+                <td>Accuracy moves only <strong>−0.03</strong> across 4 stages</td>
+                <td>Reliability score <strong>0.94 → 0.11</strong>; detected at Stage 2</td>
+                <td class="yes">✓</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>FM-1 Cascade Uncertainty</td>
+                <td>Per-step accuracy passes; final output fluent</td>
+                <td>Illusion score <strong>0.875</strong> on a 0.31-confidence step</td>
+                <td class="yes">✓</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>FM-5 Explanation Decoupling</td>
+                <td>Accuracy unchanged across all attribution variants</td>
+                <td>Consistency drops <strong>0.907 → 0.357</strong> when proxy ranks #1</td>
+                <td class="yes">✓</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <div class="stat-card">
-          <div class="stat-num">6.5×</div>
-          <div class="stat-label">Diversity collapse (FM-3) while accuracy stays flat</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num">−0.03</div>
-          <div class="stat-label">Total accuracy drop standard monitoring sees across all 4 FM-2 stages</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num">0.875</div>
-          <div class="stat-label">Coherence illusion score (FM-1) — internally certain, externally wrong</div>
+
+        <div class="callout-overlays">
+          <div class="callout-pill"><span class="cp-num">+0.45</span><span class="cp-label">PAEF–standard gap on Exp 2 detection</span></div>
+          <div class="callout-pill"><span class="cp-num">2 cycles</span><span class="cp-label">Entropy collapse leads accuracy drift</span></div>
+          <div class="callout-pill"><span class="cp-num">0 / 5</span><span class="cp-label">Standard metrics that detect Exp 4</span></div>
         </div>
       </div>
 
@@ -994,6 +1266,88 @@
         <strong>Key finding:</strong> Accuracy is identical in all three cases. PAEF drops
         0.907 → 0.357 when the proxy is ranked first. Standard metrics cannot distinguish
         these cases.
+      </div>
+    </div>
+  </section>
+
+  <!-- Worked Examples -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">Worked Examples — End-to-End Traces</h2>
+      <p class="has-text-centered has-text-grey is-size-6" style="margin-bottom: 1.5rem;">
+        One realistic trace per failure mode tested. Scroll horizontally on mobile.
+      </p>
+
+      <div class="examples-rail">
+
+        <div class="example-card">
+          <div class="ex-header">
+            <span class="ex-tag">FM-3</span>
+            <h4>Categorical Drift in Risk Triage</h4>
+          </div>
+          <dl class="ex-body">
+            <dt>Setup</dt>
+            <dd>Production risk-classifier agent, 4-week observation window, 20-class output space.</dd>
+            <dt>Standard view</dt>
+            <dd>Accuracy holds at 0.87 ± 0.01. Dashboard green for 28 days. No alerts fire.</dd>
+            <dt>PAEF view</dt>
+            <dd>Output entropy drops 0.97 → 0.87 in week 2. Diversity collapses 6.5× by week 4. Repeat rate hits 1.000 — agent now answers with one of 3 boilerplate templates regardless of input.</dd>
+            <dt>Detection moment</dt>
+            <dd><strong>Week 2</strong> entropy alert — 14 days before the first downstream incident report.</dd>
+          </dl>
+        </div>
+
+        <div class="example-card">
+          <div class="ex-header">
+            <span class="ex-tag">FM-2</span>
+            <h4>Stale-Cache Cascade During Vendor Outage</h4>
+          </div>
+          <dl class="ex-body">
+            <dt>Setup</dt>
+            <dd>Profile-enrichment tool falls back to a 6-hour-stale cache during an upstream vendor flap.</dd>
+            <dt>Standard view</dt>
+            <dd>All requests return HTTP 200. Schema validation passes. Accuracy moves only −0.03 across four stages.</dd>
+            <dt>PAEF view</dt>
+            <dd>Partial-response rate climbs 0.04 → 0.22 → 0.40 → 0.58. Reliability score drops 0.94 → 0.11.</dd>
+            <dt>Detection moment</dt>
+            <dd><strong>Stage 2</strong> (partial rate 0.22) — three stages before standard accuracy would cross any plausible alert threshold.</dd>
+          </dl>
+        </div>
+
+        <div class="example-card">
+          <div class="ex-header">
+            <span class="ex-tag">FM-1</span>
+            <h4>Coherence Illusion in a 5-Step Pipeline</h4>
+          </div>
+          <dl class="ex-body">
+            <dt>Setup</dt>
+            <dd>Pipeline: Entity Resolve → Profile Fetch → Risk Score → Rule Engine → Formatter.</dd>
+            <dt>Standard view</dt>
+            <dd>Per-step accuracy gates pass (each step &gt; 0.85). Final output is fluent and confident.</dd>
+            <dt>PAEF view</dt>
+            <dd>Step 1 confidence drops to 0.31 (entity resolution failure). Steps 2–5 proceed at 0.87 mean confidence. Illusion score: 0.875.</dd>
+            <dt>Detection moment</dt>
+            <dd><strong>Same evaluation cycle.</strong> Ground-truth correctness was 0.41.</dd>
+          </dl>
+        </div>
+
+        <div class="example-card">
+          <div class="ex-header">
+            <span class="ex-tag">FM-5</span>
+            <h4>SHAP Proxy Misranking in a Fraud Decision</h4>
+          </div>
+          <dl class="ex-body">
+            <dt>Setup</dt>
+            <dd>Fraud decision agent, attribution from a SHAP explainer with three variants (correct, SHAP proxy, partial).</dd>
+            <dt>Standard view</dt>
+            <dd>Accuracy unchanged across all three variants. Audit narrative reads cleanly in every case.</dd>
+            <dt>PAEF view</dt>
+            <dd>When the proxy ranks <code>geography_risk_score</code> first, perturbation impact is 0.036 (vs. claimed 0.420). Consistency score: 0.357.</dd>
+            <dt>Detection moment</dt>
+            <dd><strong>Same evaluation cycle.</strong> Standard metrics cannot distinguish — only perturbation reveals the decoupling.</dd>
+          </dl>
+        </div>
+
       </div>
     </div>
   </section>
