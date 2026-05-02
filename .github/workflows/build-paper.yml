@@ -31,6 +31,20 @@ jobs:
       - name: Copy compiled PDF into docs/ for GitHub Pages
         run: cp paper/paper.pdf docs/paper.pdf
 
+      - name: Build arXiv submission zip (3-file clean bundle)
+        run: |
+          cd paper
+          rm -f arxiv_final_v2.zip
+          zip arxiv_final_v2.zip paper.tex refs.bib neurips_2024.sty
+          ls -la arxiv_final_v2.zip
+
+      - name: Upload arXiv zip as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: arxiv-submission-zip
+          path: paper/arxiv_final_v2.zip
+          retention-days: 90
+
       - name: Auto-commit refreshed PDFs
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
