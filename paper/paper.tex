@@ -629,15 +629,19 @@ outcome signals sampled at lower frequency.
 
 \paragraph{Formal definition.}
 Let $\mathbf{p} = (p_1, \ldots, p_K)$ be the empirical output category distribution
-over a sliding window of $n$ outputs.  The three sub-metrics are:
-\begin{align}
-  H(\mathbf{p}) &= -\frac{1}{\log K} \sum_{k=1}^{K} p_k \log p_k
-                   && \text{(normalised Shannon entropy)} \\
-  D(\mathbf{p}) &= \frac{|\{k : p_k > 0\}|}{n}
-                   && \text{(intra-session diversity score)} \\
-  R(\mathbf{p}) &= \frac{\max_k\, \text{count}(k)}{\min(n,\, K_{\text{top}})}
-                   && \text{(repeat rate over top-}K_{\text{top}}\text{ outputs)}
-\end{align}
+over a sliding window of $n$ outputs.  The three sub-metrics are defined as
+follows.  The \emph{normalised Shannon entropy} is
+\begin{equation}
+  H(\mathbf{p}) = -\frac{1}{\log K} \sum_{k=1}^{K} p_k \log p_k.
+\end{equation}
+The \emph{intra-session diversity score} is
+\begin{equation}
+  D(\mathbf{p}) = \frac{|\{k : p_k > 0\}|}{n}.
+\end{equation}
+The \emph{repeat rate} over the top-$K_{\text{top}}$ outputs is
+\begin{equation}
+  R(\mathbf{p}) = \frac{\max_k\, \text{count}(k)}{\min(n,\, K_{\text{top}})}.
+\end{equation}
 The distribution health score is:
 \begin{equation}
   \text{PAEF}_{\text{dist}} = \alpha\, H(\mathbf{p}) + \beta\, D(\mathbf{p})
@@ -730,7 +734,8 @@ method, inheriting from \texttt{BaseMetric}.  The
 measurements, and structured metadata designed for ingestion into an
 observability stack.
 
-\begin{figure}[t]
+% figure* spans both columns (NeurIPS template is two-column).
+\begin{figure*}[t]
   \centering
   \begin{tikzpicture}[
     font=\footnotesize,
@@ -745,7 +750,7 @@ observability stack.
     resultbox/.style={bigbox, fill=violet!10, draw=violet!55, align=center},
     outputbox/.style={bigbox, fill=red!8, draw=red!55, align=left},
     metricbox/.style={rectangle, rounded corners=3pt, draw=orange!65, line width=0.6pt,
-                      fill=yellow!22, inner sep=3pt, text width=1.85cm,
+                      fill=yellow!22, inner sep=4pt, text width=2.5cm,
                       minimum height=1.3cm, font=\scriptsize, align=center},
     arrow/.style={->, line width=0.8pt, draw=gray!75}
   ]
@@ -822,7 +827,7 @@ observability stack.
     \texttt{sentence-transformers} --- no external API calls, no rate limits.
   }
   \label{fig:paef-arch}
-\end{figure}
+\end{figure*}
 
 % =============================================================================
 \section{Empirical Evaluation}
