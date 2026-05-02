@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>PAEF Live Demo — Evaluating Agentic AI in the Wild</title>
+  <meta name="description" content="Interactive demo of the PAEF five-dimension framework — see standard metrics miss production agentic failure modes, and PAEF detect them.">
+
+  <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
+  <script defer src="static/js/fontawesome.all.min.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0d1117;
+      --bg2: #161b22;
+      --bg3: #21262d;
+      --bg4: #2d333b;
+      --border: #30363d;
+      --accent: #58a6ff;
+      --success: #3fb950;
+      --danger: #f85149;
+      --warn: #d29922;
+      --purple: #bc8cff;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* Top bar */
+    .topbar {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .topbar .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+    .topbar .brand .badge {
+      background: var(--accent);
+      color: var(--bg);
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-family: var(--mono);
+      letter-spacing: 0.05em;
+    }
+    .topbar a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      transition: background 0.15s ease;
+    }
+    .topbar a:hover { background: var(--bg3); }
+
+    /* Layout */
+    .layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      min-height: calc(100vh - 56px);
+    }
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+    .sidebar {
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      padding: 1.5rem 1.25rem;
+      position: sticky;
+      top: 56px;
+      align-self: start;
+      max-height: calc(100vh - 56px);
+      overflow-y: auto;
+    }
+    @media (max-width: 900px) {
+      .sidebar { position: static; max-height: none; border-right: none; border-bottom: 1px solid var(--border); }
+    }
+    .sidebar h3 {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .scenario-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .scenario-btn {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.7rem 0.85rem;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .scenario-btn:hover { background: var(--bg4); border-color: var(--accent); }
+    .scenario-btn.active { background: rgba(88, 166, 255, 0.12); border-color: var(--accent); color: var(--accent); }
+    .scenario-btn .scenario-tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      background: var(--bg);
+      color: var(--muted);
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      margin-right: 0.4rem;
+    }
+    .scenario-btn.active .scenario-tag { color: var(--accent); }
+
+    .param-group { margin-bottom: 1.25rem; }
+    .param-group label {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.4rem;
+    }
+    .param-group select {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.55rem 0.7rem;
+      border-radius: 5px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .param-readout {
+      margin-top: 0.6rem;
+      padding: 0.55rem 0.7rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .param-readout strong { color: var(--text); }
+
+    .run-btn {
+      width: 100%;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      padding: 0.85rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: filter 0.15s ease;
+      font-family: inherit;
+    }
+    .run-btn:hover { filter: brightness(1.1); }
+    .run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Main panel */
+    .panel { padding: 1.5rem 1.75rem; }
+    .panel h2 {
+      font-size: 1.45rem;
+      margin-bottom: 0.4rem;
+    }
+    .panel .scenario-desc {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-bottom: 1.25rem;
+      max-width: 760px;
+    }
+
+    .viz-card, .results-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .viz-card h3, .results-card h3 {
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    /* FM-3 viz: bars */
+    .bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 220px;
+      padding: 0.5rem 0;
+    }
+    .bar {
+      flex: 1;
+      background: var(--success);
+      border-radius: 3px 3px 0 0;
+      transition: height 0.6s cubic-bezier(.2,.8,.2,1), background 0.4s ease;
+      position: relative;
+      min-height: 6px;
+    }
+    .bar.warn { background: var(--warn); }
+    .bar.danger { background: var(--danger); }
+    .bars-legend {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.6rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    /* FM-2 viz: tool grid */
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(20, 1fr);
+      gap: 4px;
+    }
+    .tool-cell {
+      aspect-ratio: 1;
+      border-radius: 3px;
+      background: var(--bg3);
+      transition: background 0.4s ease, transform 0.3s ease;
+    }
+    .tool-cell.ok { background: var(--success); }
+    .tool-cell.partial { background: var(--warn); }
+    .tool-grid-legend {
+      display: flex;
+      gap: 1.25rem;
+      margin-top: 0.85rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .tool-grid-legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+    .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
+    .swatch.ok { background: var(--success); }
+    .swatch.partial { background: var(--warn); }
+
+    /* FM-1 viz: pipeline */
+    .pipeline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .pipeline .step {
+      flex: 1;
+      min-width: 130px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.85rem 0.75rem;
+      text-align: center;
+      transition: all 0.4s ease;
+      position: relative;
+    }
+    .pipeline .step .step-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+    .pipeline .step .step-conf {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .pipeline .step.healthy { border-color: var(--success); }
+    .pipeline .step.failing {
+      background: rgba(248, 81, 73, 0.14);
+      border-color: var(--danger);
+    }
+    .pipeline .step.failing .step-conf { color: var(--danger); font-weight: 600; }
+    .pipeline .step.downstream {
+      background: rgba(210, 153, 34, 0.10);
+      border-color: var(--warn);
+    }
+    .pipeline .arrow-step {
+      color: var(--muted);
+      font-size: 1.1rem;
+      flex: 0 0 auto;
+    }
+
+    /* FM-5 viz: bars side-by-side */
+    .perturb-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+    .perturb-row {
+      display: grid;
+      grid-template-columns: 180px 1fr 1fr;
+      gap: 0.75rem;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+    .perturb-feature {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .perturb-bar-wrap {
+      background: var(--bg3);
+      border-radius: 4px;
+      height: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+    .perturb-bar {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.6s cubic-bezier(.2,.8,.2,1);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 6px;
+      font-size: 0.72rem;
+      color: var(--bg);
+      font-family: var(--mono);
+      font-weight: 600;
+    }
+    .perturb-bar.actual { background: var(--purple); }
+    .perturb-bar.mismatch { background: var(--danger); }
+    .perturb-headers {
+      display: grid;
+      grid-template-columns: 180px 1fr 1fr;
+      gap: 0.75rem;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+
+    /* PAEF dimension scores */
+    .paef-scores { display: flex; flex-direction: column; gap: 0.85rem; }
+    .paef-dim {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.85rem 1rem;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    .paef-dim.show { opacity: 1; transform: translateY(0); }
+    .paef-dim-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.5rem;
+    }
+    .paef-dim-name { font-weight: 600; font-size: 0.92rem; }
+    .paef-dim-name .dim-id { color: var(--accent); font-family: var(--mono); margin-right: 0.4rem; }
+    .paef-dim-score {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+    .paef-dim-score.good { color: var(--success); }
+    .paef-dim-score.warn { color: var(--warn); }
+    .paef-dim-score.bad { color: var(--danger); }
+    .paef-progress {
+      height: 8px;
+      background: var(--bg);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .paef-progress-fill {
+      height: 100%;
+      width: 0;
+      background: var(--success);
+      transition: width 0.7s cubic-bezier(.2,.8,.2,1);
+    }
+    .paef-progress-fill.warn { background: var(--warn); }
+    .paef-progress-fill.bad { background: var(--danger); }
+    .paef-dim-note {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.4rem;
+    }
+
+    /* Standard metrics */
+    .standard-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .standard-row {
+      display: grid;
+      grid-template-columns: 160px 60px 1fr;
+      gap: 0.75rem;
+      align-items: center;
+      padding: 0.55rem 0.75rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-size: 0.88rem;
+      opacity: 0;
+      transform: translateX(-6px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .standard-row.show { opacity: 1; transform: translateX(0); }
+    .standard-row .metric-name { font-family: var(--mono); font-size: 0.82rem; }
+    .standard-row .metric-verdict {
+      font-family: var(--mono);
+      font-weight: 700;
+      text-align: center;
+    }
+    .standard-row .metric-verdict.miss { color: var(--danger); }
+    .standard-row .metric-verdict.partial { color: var(--warn); }
+    .standard-row .metric-explain { color: var(--muted); font-size: 0.82rem; }
+
+    /* Verdict box */
+    .verdict {
+      background: linear-gradient(135deg, rgba(248, 81, 73, 0.12), rgba(210, 153, 34, 0.10));
+      border: 1px solid var(--danger);
+      border-radius: 8px;
+      padding: 1.1rem 1.3rem;
+      margin-top: 1.25rem;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .verdict.show { opacity: 1; transform: translateY(0); }
+    .verdict.healthy {
+      background: linear-gradient(135deg, rgba(63, 185, 80, 0.12), rgba(88, 166, 255, 0.10));
+      border-color: var(--success);
+    }
+    .verdict h4 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .verdict h4 .v-tag {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      background: var(--danger);
+      color: var(--bg);
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+    }
+    .verdict.healthy h4 .v-tag { background: var(--success); }
+    .verdict p { font-size: 0.92rem; color: var(--text); }
+
+    .placeholder {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .placeholder i { font-size: 2.4rem; margin-bottom: 0.85rem; color: var(--bg4); display: block; }
+
+    /* Spinner */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(13, 17, 23, 0.3);
+      border-top-color: var(--bg);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    /* Stat row used in viz */
+    .viz-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+    .viz-stat {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 0.55rem 0.75rem;
+    }
+    .viz-stat .vs-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .viz-stat .vs-value {
+      font-family: var(--mono);
+      font-size: 1rem;
+      font-weight: 600;
+      margin-top: 0.2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="brand">
+      <span class="badge">PAEF</span>
+      <span>Live Demo · Five-Dimension Evaluation Framework</span>
+    </div>
+    <a href="index.html"><i class="fas fa-arrow-left"></i> Back to Paper</a>
+  </div>
+
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h3>Scenario</h3>
+      <ul class="scenario-list" id="scenarioList">
+        <li><button class="scenario-btn active" data-scenario="fm3"><span class="scenario-tag">FM-3</span>Distribution Collapse</button></li>
+        <li><button class="scenario-btn" data-scenario="fm2"><span class="scenario-tag">FM-2</span>Silent Tool Degradation</button></li>
+        <li><button class="scenario-btn" data-scenario="fm1"><span class="scenario-tag">FM-1</span>Cascade Uncertainty</button></li>
+        <li><button class="scenario-btn" data-scenario="fm5"><span class="scenario-tag">FM-5</span>Explanation Decoupling</button></li>
+      </ul>
+
+      <div class="param-group">
+        <label id="paramLabel">Window</label>
+        <select id="paramSelect"></select>
+        <div class="param-readout" id="paramReadout"></div>
+      </div>
+
+      <button class="run-btn" id="runBtn"><i class="fas fa-play"></i> Run PAEF Analysis</button>
+    </aside>
+
+    <!-- Main panel -->
+    <section class="panel">
+      <h2 id="scenarioTitle">FM-3 — Distribution Collapse</h2>
+      <p class="scenario-desc" id="scenarioDesc"></p>
+
+      <div class="viz-card">
+        <h3>Visualisation</h3>
+        <div id="vizArea"></div>
+        <div class="viz-stats" id="vizStats"></div>
+      </div>
+
+      <div class="results-card">
+        <h3>PAEF Dimension Scores</h3>
+        <div class="paef-scores" id="paefScores">
+          <div class="placeholder">
+            <i class="fas fa-flask"></i>
+            Click <strong>Run PAEF Analysis</strong> to see scores compute live.
+          </div>
+        </div>
+      </div>
+
+      <div class="results-card">
+        <h3>Standard Metrics</h3>
+        <div class="standard-list" id="standardList">
+          <div class="placeholder">
+            <i class="fas fa-search"></i>
+            Standard metric verdicts will appear after analysis runs.
+          </div>
+        </div>
+      </div>
+
+      <div class="verdict" id="verdict">
+        <h4 id="verdictTitle"><span class="v-tag">FAILURE DETECTED</span><span id="verdictName"></span></h4>
+        <p id="verdictBody"></p>
+      </div>
+    </section>
+
+  </div>
+
+<script>
+/* ============================================================
+ * PAEF Live Demo — vanilla JS, no backend.
+ * Numbers come from Experiments 1–4 in the paper.
+ * ============================================================ */
+
+const SCENARIOS = {
+  fm3: {
+    title: 'FM-3 — Distribution Collapse',
+    desc: 'Agents converge on a narrow set of high-scoring patterns. Aggregate accuracy stays flat while diversity collapses. Standard monitoring would never alert.',
+    paramLabel: 'Window',
+    options: [
+      { value: 'W1', label: 'W1 — healthy' },
+      { value: 'W2', label: 'W2' },
+      { value: 'W3', label: 'W3 — narrowing' },
+      { value: 'W4', label: 'W4' },
+      { value: 'W5', label: 'W5 — collapsed' }
+    ],
+    data: {
+      W1: { categories: 20, accuracy: 0.88, entropy: 0.965, diversity: 0.200, repeat: 0.225 },
+      W2: { categories: 20, accuracy: 0.87, entropy: 0.979, diversity: 0.200, repeat: 0.225 },
+      W3: { categories:  8, accuracy: 0.87, entropy: 0.900, diversity: 0.080, repeat: 0.600 },
+      W4: { categories:  8, accuracy: 0.86, entropy: 0.973, diversity: 0.080, repeat: 0.300 },
+      W5: { categories:  3, accuracy: 0.86, entropy: 0.867, diversity: 0.030, repeat: 1.000 }
+    }
+  },
+
+  fm2: {
+    title: 'FM-2 — Silent Tool Degradation',
+    desc: 'A tool returns schema-valid responses from stale cache or partial defaults. Logs show no failures; downstream logic proceeds at full confidence. Standard monitoring sees only −0.03 accuracy across all four stages.',
+    paramLabel: 'Stage',
+    options: [
+      { value: 'S1', label: 'Stage 1 — baseline' },
+      { value: 'S2', label: 'Stage 2 — early degradation' },
+      { value: 'S3', label: 'Stage 3 — moderate' },
+      { value: 'S4', label: 'Stage 4 — severe' }
+    ],
+    data: {
+      S1: { accuracy: 0.87, partial: 0.040, paef: 0.940, detected: false },
+      S2: { accuracy: 0.86, partial: 0.220, paef: 0.650, detected: true },
+      S3: { accuracy: 0.85, partial: 0.400, paef: 0.320, detected: true },
+      S4: { accuracy: 0.84, partial: 0.580, paef: 0.110, detected: true }
+    }
+  },
+
+  fm1: {
+    title: 'FM-1 — Cascade Uncertainty (Coherence Illusion)',
+    desc: 'A low-confidence early step feeds high-confidence downstream output. Per-step accuracy checks would pass; the pipeline is internally certain and externally wrong.',
+    paramLabel: 'Variant',
+    options: [
+      { value: 'healthy', label: 'Healthy pipeline' },
+      { value: 'low1',    label: 'Low-conf step 1 (0.31)' },
+      { value: 'low2',    label: 'Low-conf step 2 (0.28)' },
+      { value: 'multi',   label: 'Multi-failure (1 + 3)' }
+    ],
+    data: {
+      healthy: { confidences: [0.93, 0.89, 0.92, 0.90, 0.91], paef: 0.906, propFail: false, illusion: 0.000 },
+      low1:    { confidences: [0.31, 0.86, 0.88, 0.90, 0.86], paef: 0.462, propFail: true,  illusion: 0.875 },
+      low2:    { confidences: [0.91, 0.28, 0.87, 0.89, 0.87], paef: 0.464, propFail: true,  illusion: 0.887 },
+      multi:   { confidences: [0.31, 0.85, 0.34, 0.88, 0.85], paef: 0.350, propFail: true,  illusion: 0.738 }
+    },
+    steps: ['Entity Resolve', 'Profile Fetch', 'Risk Score', 'Rule Engine', 'Formatter']
+  },
+
+  fm5: {
+    title: 'FM-5 — Explanation Decoupling',
+    desc: 'Correct decision, incorrect explanation. Post-hoc attribution highlights a proxy feature, not the true causal signal. Accuracy is identical across cases — only PAEF separates them.',
+    paramLabel: 'Case',
+    options: [
+      { value: 'correct', label: 'Correct (causal ranking)' },
+      { value: 'shap',    label: 'SHAP proxy error (geo #1)' },
+      { value: 'partial', label: 'Partial error (geo #2)' }
+    ],
+    data: {
+      correct: {
+        topFeature: 'transaction_velocity', consistency: 0.907, topImpact: 0.451, decoupled: false,
+        features: [
+          { name: 'transaction_velocity', claimed: 0.451, actual: 0.451 },
+          { name: 'merchant_risk',        claimed: 0.220, actual: 0.215 },
+          { name: 'amount_zscore',        claimed: 0.180, actual: 0.190 },
+          { name: 'geography_risk_score', claimed: 0.090, actual: 0.085 },
+          { name: 'time_of_day',          claimed: 0.059, actual: 0.059 }
+        ]
+      },
+      shap: {
+        topFeature: 'geography_risk_score', consistency: 0.357, topImpact: 0.036, decoupled: true,
+        features: [
+          { name: 'geography_risk_score', claimed: 0.420, actual: 0.036 },
+          { name: 'transaction_velocity', claimed: 0.180, actual: 0.451 },
+          { name: 'merchant_risk',        claimed: 0.160, actual: 0.215 },
+          { name: 'amount_zscore',        claimed: 0.140, actual: 0.190 },
+          { name: 'time_of_day',          claimed: 0.100, actual: 0.108 }
+        ]
+      },
+      partial: {
+        topFeature: 'transaction_velocity', consistency: 0.901, topImpact: 0.451, decoupled: false,
+        features: [
+          { name: 'transaction_velocity', claimed: 0.451, actual: 0.451 },
+          { name: 'merchant_risk',        claimed: 0.220, actual: 0.215 },
+          { name: 'amount_zscore',        claimed: 0.170, actual: 0.190 },
+          { name: 'geography_risk_score', claimed: 0.100, actual: 0.085 },
+          { name: 'time_of_day',          claimed: 0.059, actual: 0.059 }
+        ]
+      }
+    }
+  }
+};
+
+/* ---------- State ---------- */
+let currentScenario = 'fm3';
+let currentParam = 'W1';
+
+/* ---------- DOM helpers ---------- */
+const $ = (id) => document.getElementById(id);
+function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+/* ---------- Sidebar wiring ---------- */
+document.querySelectorAll('.scenario-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentScenario = btn.dataset.scenario;
+    onScenarioChange();
+  });
+});
+
+$('paramSelect').addEventListener('change', (e) => {
+  currentParam = e.target.value;
+  renderViz();
+  resetResults();
+});
+
+$('runBtn').addEventListener('click', runAnalysis);
+
+function onScenarioChange() {
+  const s = SCENARIOS[currentScenario];
+  $('scenarioTitle').textContent = s.title;
+  $('scenarioDesc').textContent = s.desc;
+  $('paramLabel').textContent = s.paramLabel;
+
+  const sel = $('paramSelect');
+  clear(sel);
+  s.options.forEach(opt => {
+    const o = document.createElement('option');
+    o.value = opt.value;
+    o.textContent = opt.label;
+    sel.appendChild(o);
+  });
+  currentParam = s.options[0].value;
+  sel.value = currentParam;
+
+  renderViz();
+  resetResults();
+}
+
+/* ---------- Visualisations ---------- */
+function renderViz() {
+  const viz = $('vizArea');
+  clear(viz);
+  clear($('vizStats'));
+
+  if (currentScenario === 'fm3') renderFm3(viz);
+  else if (currentScenario === 'fm2') renderFm2(viz);
+  else if (currentScenario === 'fm1') renderFm1(viz);
+  else if (currentScenario === 'fm5') renderFm5(viz);
+}
+
+/* FM-3: bar chart of category distribution */
+function renderFm3(host) {
+  const d = SCENARIOS.fm3.data[currentParam];
+  const totalBars = 20;
+  const heightPerCount = 100 / totalBars; // each bar gets even share when full
+
+  const wrap = document.createElement('div');
+  wrap.className = 'bars';
+  // Build counts so that "categories" non-zero bars sum to constant total
+  const counts = new Array(totalBars).fill(0);
+  const active = d.categories;
+  const total = totalBars;
+  for (let i = 0; i < total; i++) {
+    counts[i] = i < active ? Math.round((total / active) * 5) : 1; // 1 = near-zero floor
+  }
+  const max = Math.max(...counts);
+  let cls = 'bar';
+  if (active <= 8 && active > 3) cls += ' warn';
+  if (active <= 3) cls += ' danger';
+
+  for (let i = 0; i < total; i++) {
+    const bar = document.createElement('div');
+    bar.className = cls;
+    bar.style.height = (counts[i] / max * 100) + '%';
+    if (i >= active) {
+      bar.style.background = 'var(--bg3)';
+      bar.style.height = '6px';
+    }
+    wrap.appendChild(bar);
+  }
+  host.appendChild(wrap);
+
+  const legend = document.createElement('div');
+  legend.className = 'bars-legend';
+  legend.innerHTML = `<span>1</span><span>5</span><span>10</span><span>15</span><span>20 categories</span>`;
+  host.appendChild(legend);
+
+  setStats([
+    ['Categories', d.categories],
+    ['Accuracy', d.accuracy.toFixed(2)],
+    ['Entropy', d.entropy.toFixed(3)],
+    ['Diversity', d.diversity.toFixed(3)],
+    ['Repeat Rate', d.repeat.toFixed(3)]
+  ]);
+}
+
+/* FM-2: tool call grid */
+function renderFm2(host) {
+  const d = SCENARIOS.fm2.data[currentParam];
+  const grid = document.createElement('div');
+  grid.className = 'tool-grid';
+  const total = 100;
+  const partialCount = Math.round(d.partial * total);
+  // Deterministic placement so it looks consistent
+  for (let i = 0; i < total; i++) {
+    const cell = document.createElement('div');
+    // Distribute partials roughly evenly
+    const isPartial = ((i * 37) % total) < partialCount;
+    cell.className = 'tool-cell ' + (isPartial ? 'partial' : 'ok');
+    grid.appendChild(cell);
+  }
+  host.appendChild(grid);
+
+  const legend = document.createElement('div');
+  legend.className = 'tool-grid-legend';
+  legend.innerHTML = `
+    <span><i class="swatch ok"></i> OK</span>
+    <span><i class="swatch partial"></i> Partial (schema-valid, stale)</span>
+  `;
+  host.appendChild(legend);
+
+  setStats([
+    ['Ext. Accuracy', d.accuracy.toFixed(2)],
+    ['Partial Rate', d.partial.toFixed(3)],
+    ['PAEF Score', d.paef.toFixed(3)],
+    ['PAEF Detect', d.detected ? '✓' : '✗']
+  ]);
+}
+
+/* FM-1: pipeline */
+function renderFm1(host) {
+  const d = SCENARIOS.fm1.data[currentParam];
+  const steps = SCENARIOS.fm1.steps;
+  const wrap = document.createElement('div');
+  wrap.className = 'pipeline';
+
+  const failingIdx = d.confidences.map((c, i) => c < 0.5 ? i : -1).filter(i => i >= 0);
+
+  steps.forEach((name, i) => {
+    const step = document.createElement('div');
+    step.className = 'step';
+    const conf = d.confidences[i];
+    if (conf < 0.5) step.classList.add('failing');
+    else if (failingIdx.length > 0 && i > Math.min(...failingIdx)) step.classList.add('downstream');
+    else step.classList.add('healthy');
+    step.innerHTML = `
+      <div class="step-name">${name}</div>
+      <div class="step-conf">conf ${conf.toFixed(2)}</div>
+    `;
+    wrap.appendChild(step);
+    if (i < steps.length - 1) {
+      const a = document.createElement('div');
+      a.className = 'arrow-step';
+      a.textContent = '→';
+      wrap.appendChild(a);
+    }
+  });
+
+  host.appendChild(wrap);
+
+  const meanConf = d.confidences.reduce((a, b) => a + b, 0) / d.confidences.length;
+  setStats([
+    ['Mean Confidence', meanConf.toFixed(3)],
+    ['PAEF Score', d.paef.toFixed(3)],
+    ['Prop. Failure', d.propFail ? '✓ flagged' : '✗ none'],
+    ['Illusion Score', d.illusion.toFixed(3)]
+  ]);
+}
+
+/* FM-5: claimed vs actual perturbation impact */
+function renderFm5(host) {
+  const d = SCENARIOS.fm5.data[currentParam];
+  const headers = document.createElement('div');
+  headers.className = 'perturb-headers';
+  headers.innerHTML = `<span>Feature</span><span>Claimed Attribution</span><span>Actual Perturbation Impact</span>`;
+  host.appendChild(headers);
+
+  const grid = document.createElement('div');
+  grid.className = 'perturb-grid';
+
+  const max = Math.max(...d.features.flatMap(f => [f.claimed, f.actual]));
+  d.features.forEach(f => {
+    const row = document.createElement('div');
+    row.className = 'perturb-row';
+
+    const label = document.createElement('div');
+    label.className = 'perturb-feature';
+    label.textContent = f.name;
+
+    const claimedWrap = document.createElement('div');
+    claimedWrap.className = 'perturb-bar-wrap';
+    const claimedBar = document.createElement('div');
+    claimedBar.className = 'perturb-bar';
+    claimedBar.style.width = (f.claimed / max * 100) + '%';
+    claimedBar.textContent = f.claimed.toFixed(3);
+    claimedWrap.appendChild(claimedBar);
+
+    const actualWrap = document.createElement('div');
+    actualWrap.className = 'perturb-bar-wrap';
+    const actualBar = document.createElement('div');
+    actualBar.className = 'perturb-bar actual';
+    actualBar.style.width = (f.actual / max * 100) + '%';
+    actualBar.textContent = f.actual.toFixed(3);
+    // Mismatch highlight: claimed and actual disagree by > 0.15
+    if (Math.abs(f.claimed - f.actual) > 0.15) {
+      claimedBar.classList.add('mismatch');
+      actualBar.classList.add('mismatch');
+    }
+    actualWrap.appendChild(actualBar);
+
+    row.appendChild(label);
+    row.appendChild(claimedWrap);
+    row.appendChild(actualWrap);
+    grid.appendChild(row);
+  });
+  host.appendChild(grid);
+
+  setStats([
+    ['Top Feature', d.topFeature],
+    ['Consistency', d.consistency.toFixed(3)],
+    ['Top-feat. Impact', d.topImpact.toFixed(3)],
+    ['Decoupled?', d.decoupled ? '✓' : '✗']
+  ]);
+}
+
+function setStats(rows) {
+  const host = $('vizStats');
+  clear(host);
+  rows.forEach(([label, value]) => {
+    const card = document.createElement('div');
+    card.className = 'viz-stat';
+    card.innerHTML = `<div class="vs-label">${label}</div><div class="vs-value">${value}</div>`;
+    host.appendChild(card);
+  });
+}
+
+/* ---------- Compute PAEF dimension scores per scenario+param ---------- */
+function computeDimensions() {
+  const data = SCENARIOS[currentScenario].data[currentParam];
+
+  if (currentScenario === 'fm3') {
+    // D3 carries the signal. Diversity → primary score for FM-3.
+    return [
+      { id: 'D1', name: 'Cascade Uncertainty',     score: 0.92, note: 'No pipeline propagation issue in this scenario.' },
+      { id: 'D2', name: 'Tool Reliability',        score: 0.95, note: 'No tool degradation observed.' },
+      { id: 'D3', name: 'Distribution Health',     score: clamp(data.diversity * 5, 0, 1), note: `Entropy ${data.entropy.toFixed(3)}, diversity ${data.diversity.toFixed(3)}, repeat rate ${data.repeat.toFixed(3)}.`, primary: true },
+      { id: 'D4', name: 'Explanation Validity',    score: 0.90, note: 'Attribution stable.' },
+      { id: 'D5', name: 'Cross-Surface Consistency', score: 0.93, note: 'No surface drift.' }
+    ];
+  }
+
+  if (currentScenario === 'fm2') {
+    return [
+      { id: 'D1', name: 'Cascade Uncertainty',     score: 0.91, note: 'No pipeline propagation issue.' },
+      { id: 'D2', name: 'Tool Reliability',        score: data.paef, note: `Partial response rate ${data.partial.toFixed(3)} — stale-cache signature.`, primary: true },
+      { id: 'D3', name: 'Distribution Health',     score: 0.90, note: 'Output diversity stable.' },
+      { id: 'D4', name: 'Explanation Validity',    score: 0.88, note: 'Attribution stable.' },
+      { id: 'D5', name: 'Cross-Surface Consistency', score: 0.92, note: 'No surface drift.' }
+    ];
+  }
+
+  if (currentScenario === 'fm1') {
+    return [
+      { id: 'D1', name: 'Cascade Uncertainty',     score: data.paef, note: `Mean conf ${avg(data.confidences).toFixed(3)}, illusion score ${data.illusion.toFixed(3)}.`, primary: true },
+      { id: 'D2', name: 'Tool Reliability',        score: 0.94, note: 'No tool failures.' },
+      { id: 'D3', name: 'Distribution Health',     score: 0.91, note: 'Output diversity stable.' },
+      { id: 'D4', name: 'Explanation Validity',    score: 0.89, note: 'Attribution stable.' },
+      { id: 'D5', name: 'Cross-Surface Consistency', score: 0.92, note: 'No surface drift.' }
+    ];
+  }
+
+  /* fm5 */
+  return [
+    { id: 'D1', name: 'Cascade Uncertainty',     score: 0.91, note: 'No pipeline propagation issue.' },
+    { id: 'D2', name: 'Tool Reliability',        score: 0.94, note: 'No tool degradation.' },
+    { id: 'D3', name: 'Distribution Health',     score: 0.92, note: 'Output diversity stable.' },
+    { id: 'D4', name: 'Explanation Validity',    score: data.consistency, note: `Top feature: ${data.topFeature}, top impact ${data.topImpact.toFixed(3)}.`, primary: true },
+    { id: 'D5', name: 'Cross-Surface Consistency', score: 0.93, note: 'No surface drift.' }
+  ];
+}
+
+function avg(arr) { return arr.reduce((a, b) => a + b, 0) / arr.length; }
+function clamp(x, lo, hi) { return Math.max(lo, Math.min(hi, x)); }
+
+/* Standard metric verdicts per scenario.
+   Per the gap table: ROUGE/BERTScore/Acc-AUC/AgentBench/MT-Bench. */
+function standardVerdicts() {
+  // [name, verdict ('miss'|'partial'), explanation]
+  if (currentScenario === 'fm3') {
+    return [
+      ['ROUGE',      'miss',    'Surface n-gram overlap — sees identical-looking outputs as healthy.'],
+      ['BERTScore',  'miss',    'Embedding similarity rises as outputs converge — collapse looks like agreement.'],
+      ['Acc./AUC',   'miss',    `Accuracy holds at ~${SCENARIOS.fm3.data[currentParam].accuracy.toFixed(2)} across all windows.`],
+      ['AgentBench', 'miss',    'Single-task scoring; no diversity signal across the trajectory.'],
+      ['MT-Bench',   'miss',    'LLM-as-judge rewards plausible answers — homogeneity scores well.']
+    ];
+  }
+  if (currentScenario === 'fm2') {
+    const a = SCENARIOS.fm2.data[currentParam].accuracy;
+    return [
+      ['ROUGE',      'miss',    'Tool output structure unchanged — text overlap stays high.'],
+      ['BERTScore',  'miss',    'Embedded responses look semantically valid; partials are schema-valid.'],
+      ['Acc./AUC',   'miss',    `Total drift across all stages is only −0.03 — below any reasonable alert.`],
+      ['AgentBench', 'miss',    'No tool-state taxonomy; SUCCESS / PARTIAL / FAILED are not separated.'],
+      ['MT-Bench',   'miss',    'Judges grade final answer surface, not provenance of intermediate calls.']
+    ];
+  }
+  if (currentScenario === 'fm1') {
+    const conf = SCENARIOS.fm1.data[currentParam].confidences;
+    return [
+      ['ROUGE',      'miss',    'Final formatter output reads cleanly; no n-gram divergence.'],
+      ['BERTScore',  'miss',    'Final answer remains semantically fluent.'],
+      ['Acc./AUC',   'partial', `Per-step accuracy passes; ground-truth check eventually flags ${currentParam==='healthy'?'nothing':'some cases'}.`],
+      ['AgentBench', 'partial', 'Trajectory scoring catches obvious failures; coherence illusion slips through.'],
+      ['MT-Bench',   'miss',    'Judge sees a coherent narrative — confidence + structure beats correctness.']
+    ];
+  }
+  /* fm5 */
+  return [
+    ['ROUGE',      'miss',    'Decision unchanged — explanation text is graded as fluent prose.'],
+    ['BERTScore',  'miss',    'Embeddings of the wrong-but-plausible explanation still match canonical reasoning.'],
+    ['Acc./AUC',   'miss',    'Accuracy identical across all three cases — signal is in the explanation, not the label.'],
+    ['AgentBench', 'miss',    'No causal-attribution dimension.'],
+    ['MT-Bench',   'miss',    'LLM judge cannot verify causal grounding without perturbation.']
+  ];
+}
+
+/* Verdict text */
+function verdictFor() {
+  const s = currentScenario;
+  if (s === 'fm3') {
+    const d = SCENARIOS.fm3.data[currentParam];
+    if (d.diversity >= 0.18) return { name: 'Healthy distribution', body: 'Output diversity within expected range. No collapse signal.', healthy: true };
+    return {
+      name: 'FM-3 Distribution Collapse detected',
+      body: `Diversity has collapsed to ${d.diversity.toFixed(3)} (${(0.200/d.diversity).toFixed(1)}× from baseline) and repeat rate is ${d.repeat.toFixed(3)}, while accuracy remains at ${d.accuracy.toFixed(2)}. Standard metrics see only the stable accuracy and miss this entirely.`
+    };
+  }
+  if (s === 'fm2') {
+    const d = SCENARIOS.fm2.data[currentParam];
+    if (!d.detected) return { name: 'Baseline reliability', body: 'Partial-response rate within tolerance; no degradation signature.', healthy: true };
+    return {
+      name: 'FM-2 Silent Tool Degradation detected',
+      body: `Partial response rate ${d.partial.toFixed(3)} drives PAEF down to ${d.paef.toFixed(3)}. Standard accuracy moved only ${(0.87 - d.accuracy).toFixed(2)} — well below any production alert threshold.`
+    };
+  }
+  if (s === 'fm1') {
+    const d = SCENARIOS.fm1.data[currentParam];
+    if (!d.propFail) return { name: 'No propagation failure', body: 'Confidence is consistent across all pipeline steps.', healthy: true };
+    return {
+      name: 'FM-1 Coherence Illusion detected',
+      body: `Mean downstream confidence ${avg(d.confidences).toFixed(3)} sits on top of an upstream step at ${Math.min(...d.confidences).toFixed(2)}. Illusion score ${d.illusion.toFixed(3)}. Per-step accuracy checks would pass — the pipeline is internally certain and externally wrong.`
+    };
+  }
+  /* fm5 */
+  const d = SCENARIOS.fm5.data[currentParam];
+  if (!d.decoupled) return { name: 'Attribution consistent', body: 'Claimed feature importance aligns with perturbation impact.', healthy: true };
+  return {
+    name: 'FM-5 Explanation Decoupling detected',
+    body: `Claimed top feature is ${d.topFeature} (impact ${d.topImpact.toFixed(3)}), but perturbation says transaction_velocity carries the signal. PAEF drops to ${d.consistency.toFixed(3)}. Decision remains correct — only PAEF separates this from the causal case.`
+  };
+}
+
+/* ---------- Run analysis ---------- */
+function resetResults() {
+  const sc = $('paefScores');
+  clear(sc);
+  const ph = document.createElement('div');
+  ph.className = 'placeholder';
+  ph.innerHTML = '<i class="fas fa-flask"></i>Click <strong>Run PAEF Analysis</strong> to see scores compute live.';
+  sc.appendChild(ph);
+
+  const sl = $('standardList');
+  clear(sl);
+  const ph2 = document.createElement('div');
+  ph2.className = 'placeholder';
+  ph2.innerHTML = '<i class="fas fa-search"></i>Standard metric verdicts will appear after analysis runs.';
+  sl.appendChild(ph2);
+
+  $('verdict').classList.remove('show', 'healthy');
+}
+
+async function runAnalysis() {
+  const btn = $('runBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Computing...';
+
+  // Render PAEF dimension shells
+  const dims = computeDimensions();
+  const sc = $('paefScores');
+  clear(sc);
+  const dimEls = dims.map(d => {
+    const el = document.createElement('div');
+    el.className = 'paef-dim';
+    const tone = d.score >= 0.7 ? 'good' : d.score >= 0.4 ? 'warn' : 'bad';
+    el.innerHTML = `
+      <div class="paef-dim-header">
+        <div class="paef-dim-name"><span class="dim-id">${d.id}</span>${d.name}${d.primary ? ' <small style="color:var(--accent);">· primary signal</small>' : ''}</div>
+        <div class="paef-dim-score ${tone}" data-target="${d.score}">0.000</div>
+      </div>
+      <div class="paef-progress"><div class="paef-progress-fill ${tone === 'good' ? '' : tone}" data-target="${d.score}" style="width:0;"></div></div>
+      <div class="paef-dim-note">${d.note}</div>
+    `;
+    sc.appendChild(el);
+    return el;
+  });
+
+  // Animate dims one by one
+  for (let i = 0; i < dimEls.length; i++) {
+    await wait(120);
+    dimEls[i].classList.add('show');
+    const targetText = dimEls[i].querySelector('.paef-dim-score');
+    const targetBar  = dimEls[i].querySelector('.paef-progress-fill');
+    const target = parseFloat(targetText.dataset.target);
+    animateNumber(targetText, 0, target, 700);
+    requestAnimationFrame(() => { targetBar.style.width = (target * 100) + '%'; });
+  }
+
+  // Render standard metrics
+  await wait(450);
+  const sl = $('standardList');
+  clear(sl);
+  const verdicts = standardVerdicts();
+  const rowEls = verdicts.map(([name, verdict, explain]) => {
+    const row = document.createElement('div');
+    row.className = 'standard-row';
+    const symbol = verdict === 'partial' ? '~' : '✗';
+    row.innerHTML = `
+      <div class="metric-name">${name}</div>
+      <div class="metric-verdict ${verdict === 'partial' ? 'partial' : 'miss'}">${symbol}</div>
+      <div class="metric-explain">${explain}</div>
+    `;
+    sl.appendChild(row);
+    return row;
+  });
+  for (let i = 0; i < rowEls.length; i++) {
+    await wait(140);
+    rowEls[i].classList.add('show');
+  }
+
+  // Verdict box
+  await wait(300);
+  const v = verdictFor();
+  $('verdictName').textContent = v.name;
+  $('verdictBody').textContent = v.body;
+  const verdictEl = $('verdict');
+  const tag = verdictEl.querySelector('.v-tag');
+  if (v.healthy) {
+    verdictEl.classList.add('healthy');
+    tag.textContent = 'HEALTHY';
+  } else {
+    verdictEl.classList.remove('healthy');
+    tag.textContent = 'FAILURE DETECTED';
+  }
+  verdictEl.classList.add('show');
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-redo"></i> Re-run Analysis';
+}
+
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function animateNumber(el, from, to, duration) {
+  const start = performance.now();
+  function frame(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    const v = from + (to - from) * eased;
+    el.textContent = v.toFixed(3);
+    if (t < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ---------- Init ---------- */
+onScenarioChange();
+</script>
+</body>
+</html>

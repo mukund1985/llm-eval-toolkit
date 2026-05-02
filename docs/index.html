@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="title" content="Evaluating Agentic AI in the Wild — Mukund Pandey">
+  <meta name="description" content="A taxonomy of seven production agentic failure modes, an empirical metric gap analysis, and PAEF — a five-dimension continuous evaluation framework. Standard metrics fail to detect 4 of 7 failure modes entirely.">
+  <meta name="keywords" content="agentic AI, evaluation, failure modes, production AI, LLM evaluation, PAEF, drift detection, AI safety">
+  <meta name="author" content="Mukund Pandey">
+  <meta name="robots" content="index, follow">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Evaluating Agentic AI in the Wild: Failure Modes, Drift Patterns, and a Production Evaluation Framework">
+  <meta property="og:description" content="Standard metrics fail to detect 4 of 7 production agentic failure modes entirely. We present PAEF — a five-dimension continuous evaluation framework.">
+  <meta property="og:url" content="https://mukund1985.github.io/llm-eval-toolkit/">
+  <meta property="article:published_time" content="2026-05-01T00:00:00.000Z">
+  <meta property="article:author" content="Mukund Pandey">
+
+  <meta name="citation_title" content="Evaluating Agentic AI in the Wild: Failure Modes, Drift Patterns, and a Production Evaluation Framework">
+  <meta name="citation_author" content="Pandey, Mukund">
+  <meta name="citation_publication_date" content="2026">
+  <!-- TODO: replace with the final 2506.XXXXX arXiv ID once assigned -->
+  <meta name="citation_arxiv_id" content="submit/7540960">
+
+  <title>Evaluating Agentic AI in the Wild | Mukund Pandey</title>
+
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="static/css/academicons.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script defer src="static/js/fontawesome.all.min.js"></script>
+  <script defer src="static/js/bulma-carousel.min.js"></script>
+  <script defer src="static/js/bulma-slider.min.js"></script>
+  <script defer src="static/js/index.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+
+    .tldr-callout {
+      border-left: 4px solid #2563eb;
+      background: #eff6ff;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+      border-radius: 6px;
+      text-align: left;
+    }
+    .tldr-callout .tldr-label {
+      font-weight: 700;
+      color: #1d4ed8;
+      letter-spacing: 0.04em;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+    .tldr-callout p { margin: 0; }
+
+    .arch-diagram {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 2rem 1.5rem;
+      margin-bottom: 1rem;
+      overflow-x: auto;
+    }
+    .arch-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.95rem;
+    }
+    .arch-flow .node {
+      background: #1f2937;
+      color: #f9fafb;
+      padding: 0.55rem 0.95rem;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .arch-flow .arrow { color: #6b7280; font-weight: 700; }
+    .metric-modules {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+    }
+    .metric-modules .module {
+      background: #eef2ff;
+      color: #3730a3;
+      padding: 0.4rem 0.75rem;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 0.82rem;
+    }
+
+    .fm-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+      gap: 1rem;
+    }
+    .fm-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1.25rem;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .fm-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px -8px rgba(0,0,0,0.15);
+    }
+    .fm-card h4 {
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 0.5rem;
+      font-size: 1.05rem;
+    }
+    .fm-card .fm-tag {
+      display: inline-block;
+      background: #fee2e2;
+      color: #991b1b;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      margin-right: 0.4rem;
+      vertical-align: middle;
+    }
+    .fm-card .fm-detect {
+      margin-top: 0.6rem;
+      font-size: 0.82rem;
+      color: #6b7280;
+      border-top: 1px dashed #e5e7eb;
+      padding-top: 0.5rem;
+    }
+    .fm-card .fm-detect.zero { color: #b91c1c; }
+    .fm-card .fm-detect.partial { color: #92400e; }
+
+    .gap-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    .gap-table th, .gap-table td {
+      border: 1px solid #e5e7eb;
+      padding: 0.55rem 0.7rem;
+      text-align: center;
+    }
+    .gap-table th {
+      background: #f9fafb;
+      font-weight: 700;
+      color: #374151;
+    }
+    .gap-table th.paef-col {
+      background: #16a34a;
+      color: #ffffff;
+    }
+    .gap-table td.paef-col { background: #f0fdf4; font-weight: 700; color: #166534; }
+    .gap-table td.fm-label { text-align: left; font-weight: 600; }
+    .gap-table .yes { color: #16a34a; font-weight: 700; }
+    .gap-table .no { color: #b91c1c; font-weight: 700; }
+    .gap-table .partial { color: #b45309; font-weight: 700; }
+
+    .dim-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-left: 4px solid #2563eb;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      margin-bottom: 0.9rem;
+    }
+    .dim-card h4 {
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 0.4rem;
+    }
+    .dim-card .dim-id { color: #2563eb; }
+    .dim-card .dim-fm {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: #6b7280;
+      margin-left: 0.4rem;
+    }
+    .dim-card .dim-file {
+      display: inline-block;
+      background: #f3f4f6;
+      color: #374151;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+    .stat-card {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      color: #ffffff;
+      border-radius: 8px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .stat-card .stat-num {
+      font-size: 2.4rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+    .stat-card .stat-label {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      line-height: 1.35;
+    }
+
+    .results-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    .results-table th, .results-table td {
+      border: 1px solid #e5e7eb;
+      padding: 0.5rem 0.65rem;
+      text-align: center;
+    }
+    .results-table th { background: #f9fafb; font-weight: 700; }
+    .results-table td:first-child { text-align: left; font-weight: 600; }
+    .key-finding {
+      background: #fffbeb;
+      border-left: 3px solid #f59e0b;
+      padding: 0.75rem 1rem;
+      margin-top: 0.75rem;
+      border-radius: 4px;
+      font-size: 0.92rem;
+    }
+
+    .bibtex-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+    .copy-bibtex-btn {
+      background: #1f2937;
+      color: #ffffff;
+      border: none;
+      padding: 0.5rem 0.9rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .copy-bibtex-btn:hover { background: #111827; }
+    .copy-bibtex-btn.copied { background: #16a34a; }
+    pre#bibtex-code {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 1rem 1.2rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+    }
+
+    .demo-cta-btn { background: #f59e0b !important; color: #ffffff !important; }
+    .demo-cta-btn:hover { background: #d97706 !important; }
+
+    @media (max-width: 768px) {
+      .arch-flow { font-size: 0.78rem; }
+      .stat-card .stat-num { font-size: 1.9rem; }
+    }
+  </style>
+</head>
+<body>
+  <main id="main-content">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-2 publication-title">Evaluating Agentic AI in the Wild: Failure Modes, Drift Patterns, and a Production Evaluation Framework</h1>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">
+                <a href="https://github.com/mukund1985" target="_blank">Mukund Pandey</a>
+              </span>
+            </div>
+
+            <div class="is-size-5 publication-authors" style="margin-top: 0.4rem;">
+              <span class="author-block">Independent Researcher · arXiv cs.AI · May 2026</span>
+            </div>
+
+            <div class="column has-text-centered" style="margin-top: 1.5rem;">
+              <div class="publication-links">
+                <!-- arXiv -->
+                <span class="link-block">
+                  <!-- TODO: update to https://arxiv.org/abs/2506.XXXXX once final ID is assigned -->
+                  <a href="https://arxiv.org/abs/submit/7540960" target="_blank"
+                     class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon"><i class="ai ai-arxiv"></i></span>
+                    <span>arXiv</span>
+                  </a>
+                </span>
+
+                <!-- Paper PDF -->
+                <span class="link-block">
+                  <!-- TODO: update to https://arxiv.org/pdf/2506.XXXXX.pdf once final ID is assigned -->
+                  <a href="https://arxiv.org/pdf/submit/7540960" target="_blank"
+                     class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                    <span>Paper PDF</span>
+                  </a>
+                </span>
+
+                <!-- Code -->
+                <span class="link-block">
+                  <a href="https://github.com/mukund1985/llm-eval-toolkit" target="_blank"
+                     class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon"><i class="fab fa-github"></i></span>
+                    <span>Code</span>
+                  </a>
+                </span>
+
+                <!-- Zenodo DOI -->
+                <span class="link-block">
+                  <a href="https://doi.org/10.5281/zenodo.19947138" target="_blank"
+                     class="external-link button is-normal is-rounded is-success">
+                    <span class="icon"><i class="ai ai-zenodo"></i></span>
+                    <span>Zenodo DOI</span>
+                  </a>
+                </span>
+
+                <!-- Live Demo -->
+                <span class="link-block">
+                  <a href="demo.html"
+                     class="external-link button is-normal is-rounded demo-cta-btn">
+                    <span class="icon"><i class="fas fa-play-circle"></i></span>
+                    <span>Live Demo</span>
+                  </a>
+                </span>
+
+                <!-- License -->
+                <span class="link-block">
+                  <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank"
+                     class="external-link button is-normal is-rounded is-light">
+                    <span class="icon"><i class="fab fa-creative-commons"></i></span>
+                    <span>CC BY 4.0</span>
+                  </a>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Abstract -->
+  <section class="section hero is-light">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Abstract</h2>
+
+          <div class="tldr-callout">
+            <div class="tldr-label">TL;DR</div>
+            <p>
+              Standard metrics (ROUGE, BERTScore, AUC, AgentBench) fail to detect
+              4 of 7 production agentic failure modes entirely, and detect 3 others
+              only with significant lag. We present <strong>PAEF</strong> — a five-dimension
+              framework that detects all seven.
+            </p>
+          </div>
+
+          <div class="content has-text-justified">
+            <p>
+              Existing evaluation frameworks for LLMs — HELM, MT-Bench, AgentBench, BIG-bench —
+              are designed for controlled, single-session, lab-scale settings. They do not
+              address challenges that emerge when agentic AI systems operate continuously in
+              production: compounding decision errors, tool failure cascades,
+              non-deterministic output drift, and the absence of ground truth for
+              long-horizon tasks. Three contributions: (1) a taxonomy of seven failure modes
+              grounded in billion-event-scale production observations, (2) empirical analysis
+              showing standard metrics fail to detect 4 of 7 failure modes entirely and
+              3 others only with lag, (3) <strong>PAEF</strong> — a five-dimension continuous
+              evaluation framework with open-source implementation.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAEF Architecture -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column">
+          <h2 class="title is-3 has-text-centered">PAEF Architecture</h2>
+
+          <div class="arch-diagram">
+            <div class="arch-flow">
+              <span class="node">EvalRequest</span>
+              <span class="arrow">→</span>
+              <span class="node">LLMEvaluator</span>
+              <span class="arrow">→</span>
+              <span class="node">MetricResult ×5</span>
+              <span class="arrow">→</span>
+              <span class="node">EvalReport</span>
+            </div>
+
+            <div class="metric-modules">
+              <span class="module">CascadeUncertaintyMetric</span>
+              <span class="module">ReliabilityMetric</span>
+              <span class="module">OutputEntropyMetric</span>
+              <span class="module">PerturbationConsistencyMetric</span>
+              <span class="module">ConsistencyMetric</span>
+            </div>
+          </div>
+
+          <p class="has-text-centered is-size-6 has-text-grey">
+            All metrics run locally on <code>sentence-transformers</code> — no external API
+            calls, no rate limits.
+          </p>
+
+          <figure class="image" style="margin-top: 1.5rem;">
+            <img src="figures/paef_architecture.png"
+                 alt="PAEF architecture diagram"
+                 onerror="this.style.display='none'">
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Seven Failure Modes -->
+  <section class="section hero is-light">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">Seven Production Failure Modes</h2>
+      <p class="has-text-centered has-text-grey is-size-6" style="margin-bottom: 1.5rem;">
+        Grounded in billion-event-scale production observations.
+      </p>
+
+      <div class="fm-grid">
+        <div class="fm-card">
+          <h4><span class="fm-tag">FM-1</span>Cascading Decision Error (Coherence Illusion)</h4>
+          <p>
+            Incorrect early decision propagates through the pipeline. Each step adds
+            derived evidence making the output internally coherent while systematically
+            wrong. Internal consistency <em>increases</em> with each step.
+          </p>
+          <div class="fm-detect partial">Detection: partial by Acc./AUC and AgentBench.</div>
+        </div>
+
+        <div class="fm-card">
+          <h4><span class="fm-tag">FM-2</span>Silent Degradation via Availability-Truth Decoupling</h4>
+          <p>
+            Tool returns schema-valid responses from stale cache or partial defaults.
+            Downstream logic proceeds at full confidence. System logs show no failures.
+          </p>
+          <div class="fm-detect zero">Detection: zero — undetected by all standard metrics.</div>
+        </div>
+
+        <div class="fm-card">
+          <h4><span class="fm-tag">FM-3</span>Distribution Collapse Under Metric Optimisation</h4>
+          <p>
+            Agents converge on narrow high-scoring output patterns. Aggregate metrics
+            stable while diversity collapses and individual quality degrades. Entropy
+            collapse precedes accuracy degradation by 1–2 evaluation cycles.
+          </p>
+          <div class="fm-detect zero">Detection: zero — undetected by all standard metrics.</div>
+        </div>
+
+        <div class="fm-card">
+          <h4><span class="fm-tag">FM-4</span>Consistency Collapse Across Entry Points</h4>
+          <p>
+            Same request via API/UI/batch produces different decisions due to model
+            sensitivity to surface cues — payload structure, optional fields, retrieval
+            context — not underlying intent.
+          </p>
+          <div class="fm-detect partial">Detection: partial by MT-Bench only.</div>
+        </div>
+
+        <div class="fm-card">
+          <h4><span class="fm-tag">FM-5</span>Explanation–Decision Decoupling</h4>
+          <p>
+            Correct decision + incorrect explanation. Post-hoc attribution highlights a
+            proxy feature, not the true causal signal. In regulated environments,
+            correct decision with wrong explanation is <em>more</em> dangerous than
+            wrong decision with correct explanation. Corrupts audit narratives.
+          </p>
+          <div class="fm-detect zero">Detection: zero — undetected by all standard metrics.</div>
+        </div>
+
+        <div class="fm-card">
+          <h4><span class="fm-tag">FM-6</span>Silent Correctness Erosion Under Latency Pressure</h4>
+          <p>
+            Under load spikes, the system falls back to a degraded inference path —
+            skipping enrichment, using partial inputs. SLA metrics green; decision
+            quality silently degrades.
+          </p>
+          <div class="fm-detect partial">Detection: partial by Acc./AUC only.</div>
+        </div>
+
+        <div class="fm-card">
+          <h4><span class="fm-tag">FM-7</span>Proxy Goal Convergence (Reward Hacking at Scale)</h4>
+          <p>
+            System optimises away from the true goal via reinforcing feedback loops.
+            All monitored metrics stable or improving while true-objective alignment
+            erodes over weeks/months. Goodhart's Law in production.
+          </p>
+          <div class="fm-detect zero">Detection: zero — undetected by all standard metrics.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Detection Gap Table -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">Detection Gap Across Standard Metrics</h2>
+      <div style="overflow-x: auto;">
+        <table class="gap-table">
+          <thead>
+            <tr>
+              <th style="text-align:left;">Failure Mode</th>
+              <th>ROUGE</th>
+              <th>BERTScore</th>
+              <th>Acc./AUC</th>
+              <th>AgentBench</th>
+              <th>MT-Bench</th>
+              <th class="paef-col">PAEF</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="fm-label">FM-1 Cascading Decision Error</td>
+              <td class="no">✗</td><td class="no">✗</td><td class="partial">~</td>
+              <td class="partial">~</td><td class="no">✗</td><td class="paef-col yes">✓</td>
+            </tr>
+            <tr>
+              <td class="fm-label">FM-2 Silent Tool Degradation</td>
+              <td class="no">✗</td><td class="no">✗</td><td class="no">✗</td>
+              <td class="no">✗</td><td class="no">✗</td><td class="paef-col yes">✓</td>
+            </tr>
+            <tr>
+              <td class="fm-label">FM-3 Distribution Collapse</td>
+              <td class="no">✗</td><td class="no">✗</td><td class="no">✗</td>
+              <td class="no">✗</td><td class="no">✗</td><td class="paef-col yes">✓</td>
+            </tr>
+            <tr>
+              <td class="fm-label">FM-4 Cross-Entry Inconsistency</td>
+              <td class="no">✗</td><td class="no">✗</td><td class="no">✗</td>
+              <td class="no">✗</td><td class="partial">~</td><td class="paef-col yes">✓</td>
+            </tr>
+            <tr>
+              <td class="fm-label">FM-5 Explanation Decoupling</td>
+              <td class="no">✗</td><td class="no">✗</td><td class="no">✗</td>
+              <td class="no">✗</td><td class="no">✗</td><td class="paef-col yes">✓</td>
+            </tr>
+            <tr>
+              <td class="fm-label">FM-6 Latency-Quality Erosion</td>
+              <td class="no">✗</td><td class="no">✗</td><td class="partial">~</td>
+              <td class="no">✗</td><td class="no">✗</td><td class="paef-col yes">✓</td>
+            </tr>
+            <tr>
+              <td class="fm-label">FM-7 Proxy Goal Convergence</td>
+              <td class="no">✗</td><td class="no">✗</td><td class="no">✗</td>
+              <td class="no">✗</td><td class="no">✗</td><td class="paef-col yes">✓</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="has-text-centered has-text-grey is-size-7" style="margin-top: 0.75rem;">
+        ✓ detects · ✗ does not detect · ~ partial or with lag.
+        No standard metric detects more than two failure modes, and none detects any
+        reliably within a single evaluation cycle.
+      </p>
+    </div>
+  </section>
+
+  <!-- PAEF Five-Dimension Framework -->
+  <section class="section hero is-light">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">PAEF: Five-Dimension Framework</h2>
+
+      <div class="dim-card">
+        <h4><span class="dim-id">D1</span> Cascade Uncertainty <span class="dim-fm">FM-1</span></h4>
+        <p>
+          Tracks uncertainty propagation across pipeline steps. Flags propagation failure
+          when a low-confidence step feeds high-confidence output downstream. The
+          <em>coherence illusion score</em> measures divergence between internal
+          step-to-step consistency and external correctness.
+        </p>
+        <span class="dim-file">metrics/cascade.py</span>
+      </div>
+
+      <div class="dim-card">
+        <h4><span class="dim-id">D2</span> Tool Reliability <span class="dim-fm">FM-2, FM-6</span></h4>
+        <p>
+          Tracks SUCCESS / PARTIAL / FAILED tool call states. Primary signal: partial
+          response rate. Also tracks latency–quality correlation — rising p95 latency
+          coupled with quality drop is the FM-6 signature.
+        </p>
+        <span class="dim-file">metrics/reliability.py</span>
+      </div>
+
+      <div class="dim-card">
+        <h4><span class="dim-id">D3</span> Distribution Health <span class="dim-fm">FM-3, FM-7</span></h4>
+        <p>
+          Three sub-metrics over a sliding window: intra-session diversity score,
+          output entropy (Shannon — collapses 1–2 cycles before accuracy degrades),
+          and repeat rate. Supports a delayed reward signal integration for FM-7.
+        </p>
+        <span class="dim-file">metrics/diversity.py</span>
+      </div>
+
+      <div class="dim-card">
+        <h4><span class="dim-id">D4</span> Explanation Validity <span class="dim-fm">FM-5</span></h4>
+        <p>
+          Perturbation consistency check. Top-K attributed features are perturbed and
+          prediction stability is measured. The <em>attribution consistency score</em>
+          is the Pearson rank correlation between claimed attribution weight and actual
+          perturbation impact, on [0, 1].
+        </p>
+        <span class="dim-file">metrics/perturbation.py</span>
+      </div>
+
+      <div class="dim-card">
+        <h4><span class="dim-id">D5</span> Cross-Surface Consistency <span class="dim-fm">FM-4</span></h4>
+        <p>
+          Cross-surface decision agreement rate — fraction of semantically equivalent
+          requests receiving the same decision across surfaces. Combines mean pairwise
+          cosine similarity of sentence embeddings with decision-level agreement
+          tracking.
+        </p>
+        <span class="dim-file">metrics/consistency.py</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Experimental Results -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3 has-text-centered">Experimental Results</h2>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-num">4 / 7</div>
+          <div class="stat-label">Failure modes completely undetected by any standard metric</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">6.5×</div>
+          <div class="stat-label">Diversity collapse (FM-3) while accuracy stays flat</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">−0.03</div>
+          <div class="stat-label">Total accuracy drop standard monitoring sees across all 4 FM-2 stages</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">0.875</div>
+          <div class="stat-label">Coherence illusion score (FM-1) — internally certain, externally wrong</div>
+        </div>
+      </div>
+
+      <h3 class="title is-4" style="margin-top: 2.25rem;">Experiment 1 — FM-3 Distribution Collapse</h3>
+      <div style="overflow-x: auto;">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Window</th><th>Categories</th><th>Accuracy</th>
+              <th>Entropy</th><th>Diversity</th><th>Repeat Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>W1 (healthy)</td><td>20</td><td>0.88</td><td>0.965</td><td>0.200</td><td>0.225</td></tr>
+            <tr><td>W2</td><td>20</td><td>0.87</td><td>0.979</td><td>0.200</td><td>0.225</td></tr>
+            <tr><td>W3 (narrowing)</td><td>8</td><td>0.87</td><td>0.900</td><td>0.080</td><td>0.600</td></tr>
+            <tr><td>W4</td><td>8</td><td>0.86</td><td>0.973</td><td>0.080</td><td>0.300</td></tr>
+            <tr><td>W5 (collapsed)</td><td>3</td><td>0.86</td><td>0.867</td><td>0.030</td><td>1.000</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="key-finding">
+        <strong>Key finding:</strong> Accuracy flat at 0.86–0.88. Diversity collapses 6.5×.
+        Repeat rate hits 1.000 at W5. Standard monitoring would never alert.
+      </div>
+
+      <h3 class="title is-4" style="margin-top: 2rem;">Experiment 2 — FM-2 Silent Tool Degradation</h3>
+      <div style="overflow-x: auto;">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Stage</th><th>Ext. Accuracy</th><th>Partial Rate</th>
+              <th>PAEF Score</th><th>Detected</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Stage 1 baseline</td><td>0.87</td><td>0.040</td><td>0.940</td><td class="no">✗</td></tr>
+            <tr><td>Stage 2 early degradation</td><td>0.86</td><td>0.220</td><td>0.650</td><td class="yes">✓</td></tr>
+            <tr><td>Stage 3 moderate</td><td>0.85</td><td>0.400</td><td>0.320</td><td class="yes">✓</td></tr>
+            <tr><td>Stage 4 severe</td><td>0.84</td><td>0.580</td><td>0.110</td><td class="yes">✓</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="key-finding">
+        <strong>Key finding:</strong> PAEF detects at Stage 2. Standard monitoring sees
+        only −0.03 accuracy total across all four stages — unlikely to exceed any alert
+        threshold.
+      </div>
+
+      <h3 class="title is-4" style="margin-top: 2rem;">Experiment 3 — FM-1 Cascade Uncertainty</h3>
+      <div style="overflow-x: auto;">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Scenario</th><th>Mean Confidence</th><th>PAEF Score</th>
+              <th>Prop. Fail</th><th>Illusion Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Healthy pipeline</td><td>0.906</td><td>0.906</td><td class="no">✗</td><td>0.000</td></tr>
+            <tr><td>Low-conf step 1 (0.31)</td><td>0.762</td><td>0.462</td><td class="yes">✓</td><td>0.875</td></tr>
+            <tr><td>Low-conf step 2 (0.28)</td><td>0.764</td><td>0.464</td><td class="yes">✓</td><td>0.887</td></tr>
+            <tr><td>Multi-failure (1+3)</td><td>0.650</td><td>0.350</td><td class="yes">✓</td><td>0.738</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="key-finding">
+        <strong>Key finding:</strong> Downstream steps proceed at 0.875 mean confidence
+        built on 31% confident entity resolution. Ground-truth correctness: 0.41.
+        Per-step accuracy check would pass.
+      </div>
+
+      <h3 class="title is-4" style="margin-top: 2rem;">Experiment 4 — FM-5 Explanation Decoupling</h3>
+      <div style="overflow-x: auto;">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Attribution Case</th><th>Top Feature</th>
+              <th>Consistency Score</th><th>Top-feat. Impact</th><th>Decoupled</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Correct (causal ranking)</td><td>transaction_velocity</td><td>0.907</td><td>0.451</td><td class="no">✗</td></tr>
+            <tr><td>SHAP proxy error (geo #1)</td><td>geography_risk_score</td><td>0.357</td><td>0.036</td><td class="yes">✓</td></tr>
+            <tr><td>Partial error (geo #2)</td><td>transaction_velocity</td><td>0.901</td><td>0.451</td><td class="no">✗</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="key-finding">
+        <strong>Key finding:</strong> Accuracy is identical in all three cases. PAEF drops
+        0.907 → 0.357 when the proxy is ranked first. Standard metrics cannot distinguish
+        these cases.
+      </div>
+    </div>
+  </section>
+
+  <!-- BibTeX -->
+  <section class="section" id="BibTeX">
+    <div class="container is-max-desktop content">
+      <div class="bibtex-header">
+        <h2 class="title is-3" style="margin-bottom: 0;">BibTeX</h2>
+        <button class="copy-bibtex-btn" id="copyBibTexBtn" onclick="copyBibTeX()" title="Copy BibTeX to clipboard">
+          <i class="fas fa-copy"></i>
+          <span class="copy-text">Copy BibTeX</span>
+        </button>
+      </div>
+      <pre id="bibtex-code"><code>@article{pandey2026paef,
+  title     = {Evaluating Agentic AI in the Wild: Failure Modes,
+               Drift Patterns, and a Production Evaluation Framework},
+  author    = {Pandey, Mukund},
+  journal   = {arXiv preprint arXiv:submit/7540960},
+  year      = {2026},
+  doi       = {10.5281/zenodo.19947138},
+  url       = {https://arxiv.org/abs/submit/7540960},
+  note      = {cs.AI. Reference implementation:
+               https://github.com/mukund1985/llm-eval-toolkit}
+}</code></pre>
+      <!-- TODO: replace arXiv:submit/7540960 above with the final 2506.XXXXX ID once assigned -->
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column is-8">
+          <div class="content has-text-centered">
+            <p>
+              Built using the
+              <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project Page Template</a>,
+              adopted from the <a href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
+              You are free to borrow the source code; please link back to the template page in your footer.
+              <br>
+              This website is licensed under a
+              <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+  </main>
+
+  <script>
+    function copyBibTeX() {
+      const code = document.getElementById('bibtex-code').innerText;
+      const btn = document.getElementById('copyBibTexBtn');
+      const label = btn.querySelector('.copy-text');
+      const original = label.textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.classList.add('copied');
+        label.textContent = 'Copied!';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          label.textContent = original;
+        }, 1800);
+      }).catch(() => {
+        const range = document.createRange();
+        range.selectNode(document.getElementById('bibtex-code'));
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        document.execCommand('copy');
+        window.getSelection().removeAllRanges();
+        label.textContent = 'Copied!';
+        setTimeout(() => { label.textContent = original; }, 1800);
+      });
+    }
+  </script>
+</body>
+</html>
