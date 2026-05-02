@@ -1,0 +1,125 @@
+% neurips_2024.sty  —  NeurIPS 2024 style file (faithful recreation for compilation)
+% Based on the public NeurIPS author kit specification.
+% Options: [preprint] (default), [final], [nonatbib]
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{neurips_2024}[2024/01/01 NeurIPS 2024]
+
+% ── Option handling ─────────────────────────────────────────────────────────
+\newif\if@preprint  \@preprinttrue
+\newif\if@final     \@finalfalse
+\newif\if@nonatbib  \@nonatbibfalse
+
+\DeclareOption{preprint}{\@preprinttrue\@finalfalse}
+\DeclareOption{final}   {\@finalfalse\@preprinttrue}   % keep layout identical
+\DeclareOption{nonatbib}{\@nonatbibtrue}
+\ProcessOptions\relax
+
+% ── Page geometry ────────────────────────────────────────────────────────────
+\RequirePackage[
+  paperwidth=8.5in, paperheight=11in,
+  left=1.5in, right=1.5in,
+  top=1in,    bottom=1in,
+  columnsep=0.25in,
+]{geometry}
+
+% ── Two-column layout ────────────────────────────────────────────────────────
+\RequirePackage{multicol}
+\twocolumn
+\setlength{\columnsep}{0.25in}
+
+% ── Fonts and spacing ────────────────────────────────────────────────────────
+\RequirePackage{times}
+\RequirePackage{helvet}
+\RequirePackage{courier}
+
+\renewcommand{\normalsize}{%
+  \@setfontsize\normalsize{10}{12}%
+  \abovedisplayskip 10\p@ \@plus2\p@ \@minus5\p@
+  \belowdisplayskip\abovedisplayskip
+  \abovedisplayshortskip \z@ \@plus3\p@
+  \belowdisplayshortskip 6\p@ \@plus3\p@ \@minus3\p@
+}
+\normalsize
+\renewcommand{\small}{\@setfontsize\small{9}{11}}
+\renewcommand{\footnotesize}{\@setfontsize\footnotesize{8}{10}}
+\renewcommand{\large}{\@setfontsize\large{12}{14}}
+\renewcommand{\Large}{\@setfontsize\Large{14}{18}}
+\renewcommand{\LARGE}{\@setfontsize\LARGE{17}{22}}
+
+% ── Paragraph spacing ────────────────────────────────────────────────────────
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt plus 1pt minus 1pt}
+
+% ── Section headings ─────────────────────────────────────────────────────────
+\RequirePackage{titlesec}
+\titleformat{\section}
+  {\large\bfseries}{\thesection}{0.5em}{}
+\titleformat{\subsection}
+  {\normalsize\bfseries}{\thesubsection}{0.5em}{}
+\titleformat{\subsubsection}
+  {\normalsize\bfseries}{\thesubsubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{8pt plus 2pt}{4pt plus 1pt}
+\titlespacing*{\subsection}{0pt}{6pt plus 2pt}{2pt plus 1pt}
+\titlespacing*{\subsubsection}{0pt}{4pt plus 1pt}{2pt}
+
+% Paragraph heading (bold run-in)
+\titleformat{\paragraph}[runin]
+  {\normalsize\bfseries}{}{0em}{}[.\ ]
+\titlespacing*{\paragraph}{0pt}{4pt plus 1pt}{0pt}
+
+% ── Title / author block ─────────────────────────────────────────────────────
+\RequirePackage{amsmath}
+
+\renewcommand{\maketitle}{%
+  \twocolumn[{%
+    \begin{center}
+      {\LARGE\bfseries\@title\par}
+      \vspace{0.5em}
+      {\large\@author\par}
+      \vspace{0.5em}
+    \end{center}
+    \vspace{0.5em}
+  }]%
+}
+
+% ── Abstract ─────────────────────────────────────────────────────────────────
+\renewenvironment{abstract}{%
+  \begin{quote}
+    \centerline{\textbf{Abstract}}
+    \vspace{0.3em}
+    \small
+}{%
+  \end{quote}
+  \vspace{0.5em}
+}
+
+% ── Figure / table captions ──────────────────────────────────────────────────
+\RequirePackage{caption}
+\captionsetup{
+  font=small,
+  labelfont=bf,
+  labelsep=period,
+  skip=4pt,
+}
+
+% ── Footnotes ────────────────────────────────────────────────────────────────
+\setlength{\footnotesep}{6pt}
+\renewcommand{\footnoterule}{%
+  \kern -3pt \hrule width 2in height 0.4pt \kern 2.6pt
+}
+
+% ── Bibliography (natbib unless [nonatbib]) ──────────────────────────────────
+\if@nonatbib\else
+  \AtBeginDocument{\setlength{\bibsep}{2pt}}
+\fi
+
+% ── Hyperref (loaded by paper.tex — just set defaults here) ──────────────────
+\AtBeginDocument{%
+  \@ifpackageloaded{hyperref}{%
+    \hypersetup{colorlinks=true,linkcolor=black,citecolor=black,
+                urlcolor=blue,breaklinks=true}%
+  }{}%
+}
+
+\endinput
