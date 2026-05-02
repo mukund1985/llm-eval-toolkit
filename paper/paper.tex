@@ -547,6 +547,27 @@ threshold $\tau_u$ passes its output downstream, and reports the mean
 confidence of all steps downstream of the first failure point as the coherence
 illusion score.
 
+\paragraph{Formal definition.}
+Let $\mathbf{s} = (s_1, s_2, \ldots, s_N)$ be a sequence of pipeline steps,
+each with confidence score $c_i \in [0,1]$.  Let $\tau_u$ be the uncertainty
+propagation threshold.  Define the set of downstream steps after the first
+propagation failure:
+\begin{equation}
+  S_{\text{down}} = \{\, j \mid j > \min\{i : c_i < \tau_u,\, i < N\} \,\}
+\end{equation}
+The \textbf{coherence illusion score} is:
+\begin{equation}
+  \text{CIS}(\mathbf{s}) = \frac{1}{|S_{\text{down}}|}
+                            \sum_{j \in S_{\text{down}}} c_j
+\end{equation}
+The cascade uncertainty score is:
+\begin{equation}
+  \text{PAEF}_{\text{cascade}}(\mathbf{s}) = \bar{c} - \lambda \cdot \text{CIS}(\mathbf{s}),
+  \quad \lambda = 0.5
+\end{equation}
+where $\bar{c} = \frac{1}{N}\sum_{i=1}^{N} c_i$.  A high $\text{CIS}$ combined
+with low ground-truth correctness is the signature of the coherence illusion (FM-1).
+
 \begin{sloppypar}\paragraph{Implementation.} \texttt{metrics/cascade.py} ---
 \texttt{Cascade\-Uncertainty\-Metric}, \texttt{Step\-Result} dataclass.\end{sloppypar}
 
@@ -562,6 +583,26 @@ decoupling (FM-2).
 PAEF also tracks \textbf{latency-quality correlation}: when p95 tool latency
 rises, does decision quality degrade?  A positive correlation between latency
 spikes and quality drops is the FM-6 signature.
+
+\paragraph{Formal definition.}
+Let $\mathcal{C} = \{c_1, \ldots, c_M\}$ be the set of tool calls in an evaluation
+window, each with state $\text{state}(c) \in \{\textsc{success}, \textsc{partial},
+\textsc{failed}\}$.  The \textbf{partial response rate} is:
+\begin{equation}
+  \text{PRR} = \frac{|\{c \in \mathcal{C} : \text{state}(c) = \textsc{partial}\}|}
+                    {|\mathcal{C}|}
+\end{equation}
+The \textbf{latency-quality correlation} is the Pearson correlation between
+p95 tool latency and downstream quality degradation:
+\begin{equation}
+  \rho_{LQ} = \text{Pearson}(\mathbf{l}_{p95},\, \Delta\mathbf{q})
+\end{equation}
+The tool reliability score is:
+\begin{equation}
+  \text{PAEF}_{\text{tool}} = 1 - \text{PRR} \cdot (1 + \max(\rho_{LQ},\, 0))
+\end{equation}
+A rising $\text{PRR}$ with stable output accuracy is the FM-2 signature;
+a positive $\rho_{LQ}$ is the FM-6 signature.
 
 \begin{sloppypar}\paragraph{Implementation.} \texttt{metrics/reliability.py} ---
 \texttt{Reliability\-Metric}, \texttt{Tool\-Call\-State} enum.\end{sloppypar}
@@ -584,6 +625,26 @@ For FM-7 (proxy goal convergence), PAEF supports delayed reward signal
 integration: correlating short-term metric performance with long-horizon
 outcome signals sampled at lower frequency.
 
+\paragraph{Formal definition.}
+Let $\mathbf{p} = (p_1, \ldots, p_K)$ be the empirical output category distribution
+over a sliding window of $n$ outputs.  The three sub-metrics are:
+\begin{align}
+  H(\mathbf{p}) &= -\frac{1}{\log K} \sum_{k=1}^{K} p_k \log p_k
+                   && \text{(normalised Shannon entropy)} \\
+  D(\mathbf{p}) &= \frac{|\{k : p_k > 0\}|}{n}
+                   && \text{(intra-session diversity score)} \\
+  R(\mathbf{p}) &= \frac{\max_k\, \text{count}(k)}{\min(n,\, K_{\text{top}})}
+                   && \text{(repeat rate over top-}K_{\text{top}}\text{ outputs)}
+\end{align}
+The distribution health score is:
+\begin{equation}
+  \text{PAEF}_{\text{dist}} = \alpha\, H(\mathbf{p}) + \beta\, D(\mathbf{p})
+                              + \gamma\, (1 - R(\mathbf{p}))
+\end{equation}
+with $\alpha + \beta + \gamma = 1$.  Entropy collapse ($H \to 0$) precedes
+accuracy degradation by 1--2 evaluation cycles, providing early warning for
+FM-3 and FM-7.
+
 \begin{sloppypar}\paragraph{Implementation.} \texttt{metrics/diversity.py} ---
 \texttt{Output\-Entropy\-Metric}, \texttt{Intrasession\-Diversity\-Metric},
 \texttt{Repeat\-Rate\-Metric}, \texttt{Diversity\-Report}.\end{sloppypar}
@@ -602,6 +663,23 @@ between claimed attribution weight and actual perturbation impact, mapped to
 $[0, 1]$.  A score near zero, combined with near-zero impact for the
 top-ranked feature, triggers the decoupling flag.
 
+\paragraph{Formal definition.}
+Let $\mathbf{w} = (w_1, \ldots, w_K)$ be the claimed attribution weights for the
+top-$K$ features (e.g.\ from SHAP), ranked in descending order.  Let
+$\boldsymbol{\delta} = (\delta_1, \ldots, \delta_K)$ be the measured prediction
+change when each feature is perturbed (nullified).  The
+\textbf{attribution consistency score} is:
+\begin{equation}
+  \text{ACS} = \frac{r_s(\mathbf{w},\, \boldsymbol{\delta}) + 1}{2} \in [0, 1]
+\end{equation}
+where $r_s$ denotes the Spearman rank correlation.  An explanation is flagged
+as \emph{decoupled} when:
+\begin{equation}
+  \text{ACS} < \theta_{\text{ACS}} \quad \text{and} \quad \delta_1 < \delta_{\min}
+\end{equation}
+where $\delta_1$ is the perturbation impact of the top-ranked feature, and
+$\theta_{\text{ACS}} = 0.5$, $\delta_{\min} = 0.05$ are configurable thresholds.
+
 \begin{sloppypar}\paragraph{Implementation.} \texttt{metrics/perturbation.py} ---
 \texttt{Perturbation\-Consistency\-Metric}.\end{sloppypar}
 
@@ -616,6 +694,26 @@ representations.  Agreement rate below threshold triggers a consistency flag.
 PAEF uses the existing \texttt{Consistency\allowbreak{}Metric} (mean pairwise cosine
 similarity of sentence embeddings across paraphrase variants), extended with
 decision-level agreement tracking.
+
+\paragraph{Formal definition.}
+Let $\mathcal{R} = \{(r_i, r_j)\}$ be the set of semantically equivalent request
+pairs across surface variants, and let $d(r)$ denote the decision for request
+$r$.  The \textbf{cross-surface decision agreement rate} is:
+\begin{equation}
+  \text{AR} = \frac{|\{(r_i, r_j) \in \mathcal{R} : d(r_i) = d(r_j)\}|}{|\mathcal{R}|}
+\end{equation}
+Semantic equivalence is measured using cosine similarity of sentence embeddings:
+\begin{equation}
+  \text{sim}(r_i, r_j) = \frac{\phi(r_i) \cdot \phi(r_j)}
+                              {\|\phi(r_i)\|\,\|\phi(r_j)\|}
+\end{equation}
+where $\phi(\cdot)$ denotes the sentence-transformer embedding.  The
+cross-surface consistency score is:
+\begin{equation}
+  \text{PAEF}_{\text{consist}} = \text{AR} \cdot
+    \frac{1}{|\mathcal{R}|} \sum_{(r_i, r_j) \in \mathcal{R}} \text{sim}(r_i, r_j)
+\end{equation}
+Agreement rate below threshold $\theta_{\text{AR}}$ triggers a consistency flag (FM-4).
 
 \begin{sloppypar}\paragraph{Implementation.} \texttt{metrics/consistency.py} ---
 \texttt{ConsistencyMetric} extended with decision agreement tracking.\end{sloppypar}

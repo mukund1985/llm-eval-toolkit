@@ -1,0 +1,41 @@
+name: Build paper PDF
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'paper/**.tex'
+      - 'paper/**.bib'
+      - 'paper/**.sty'
+      - 'paper/figures/**'
+      - '.github/workflows/build-paper.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Compile paper.tex with latexmk (TeX Live full image)
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: paper
+          root_file: paper.tex
+          args: -pdf -interaction=nonstopmode -file-line-error -halt-on-error
+
+      - name: Copy compiled PDF into docs/ for GitHub Pages
+        run: cp paper/paper.pdf docs/paper.pdf
+
+      - name: Auto-commit refreshed PDFs
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "ci: rebuild paper.pdf [skip ci]"
+          file_pattern: 'docs/paper.pdf paper/paper.pdf'
+          commit_user_name: github-actions[bot]
+          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          commit_author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
