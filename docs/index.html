@@ -270,6 +270,145 @@
     .demo-cta-btn { background: #f59e0b !important; color: #ffffff !important; }
     .demo-cta-btn:hover { background: #d97706 !important; }
 
+    /* Detailed colourful architecture figure */
+    .arch-figure {
+      margin-top: 2rem;
+      padding: 1.5rem 1rem;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      overflow-x: auto;
+    }
+    .arch-row {
+      display: grid;
+      grid-template-columns: 1.1fr 0.4fr 1.1fr 0.4fr 1.4fr 0.4fr 1.1fr 0.4fr 1.1fr;
+      gap: 0.5rem;
+      align-items: stretch;
+    }
+    .arch-row-labels { margin-bottom: 0.5rem; }
+    .arch-label {
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #6b7280;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .arch-row-cards { align-items: center; }
+    .arch-box {
+      border-radius: 10px;
+      padding: 0.9rem 0.8rem;
+      border: 2px solid;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+    }
+    .arch-input        { background: #dbeafe; border-color: #93c5fd; }
+    .arch-orchestrator { background: #d1fae5; border-color: #6ee7b7; }
+    .arch-result       { background: #ede9fe; border-color: #c4b5fd; }
+    .arch-output       { background: #fce7f3; border-color: #f9a8d4; }
+    .arch-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #111827;
+      text-align: center;
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.6rem;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+    .arch-input        .arch-title { color: #1e40af; }
+    .arch-orchestrator .arch-title { color: #047857; }
+    .arch-result       .arch-title { color: #5b21b6; }
+    .arch-output       .arch-title { color: #9d174d; }
+    .arch-fields, .arch-desc {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .arch-fields li {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: #374151;
+      padding-left: 0.6rem;
+      position: relative;
+    }
+    .arch-fields li::before {
+      content: '·';
+      position: absolute;
+      left: 0;
+      color: #9ca3af;
+      font-weight: 700;
+    }
+    .arch-desc li {
+      font-size: 0.82rem;
+      color: #065f46;
+      padding-left: 0.6rem;
+      position: relative;
+    }
+    .arch-desc li::before {
+      content: '›';
+      position: absolute;
+      left: 0;
+      color: #10b981;
+      font-weight: 700;
+    }
+    .arch-arrow {
+      text-align: center;
+      font-size: 1.5rem;
+      color: #9ca3af;
+      font-weight: 700;
+      align-self: center;
+      position: relative;
+    }
+    .arch-mult {
+      display: block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: #6b7280;
+      font-weight: 600;
+    }
+    .arch-metric-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .arch-metric {
+      background: #fef3c7;
+      border: 2px solid #fcd34d;
+      border-radius: 8px;
+      padding: 0.55rem 0.65rem;
+      text-align: center;
+    }
+    .arch-metric-name {
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: #92400e;
+      line-height: 1.2;
+    }
+    .arch-metric-fm {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: #b45309;
+      margin-top: 0.2rem;
+    }
+
+    @media (max-width: 900px) {
+      .arch-figure { padding: 1rem 0.5rem; }
+      .arch-row {
+        grid-template-columns: 1fr;
+      }
+      .arch-row-labels { display: none; }
+      .arch-arrow {
+        transform: rotate(90deg);
+        padding: 0.4rem 0;
+      }
+      .arch-box { min-height: 0; }
+    }
+
     .demo-embed {
       position: relative;
       width: 100%;
@@ -449,6 +588,87 @@
             All metrics run locally on <code>sentence-transformers</code> — no external API
             calls, no rate limits.
           </p>
+
+          <!-- Detailed colourful architecture figure -->
+          <div class="arch-figure" aria-label="PAEF detailed architecture">
+            <div class="arch-row arch-row-labels">
+              <div class="arch-label">INPUT</div>
+              <div></div>
+              <div class="arch-label">ORCHESTRATOR</div>
+              <div></div>
+              <div class="arch-label">METRICS</div>
+              <div></div>
+              <div class="arch-label">METRIC RESULT</div>
+              <div></div>
+              <div class="arch-label">OUTPUT</div>
+            </div>
+
+            <div class="arch-row arch-row-cards">
+              <!-- INPUT -->
+              <div class="arch-box arch-input">
+                <div class="arch-title">EvalRequest</div>
+                <ul class="arch-fields">
+                  <li>response</li>
+                  <li>context</li>
+                  <li>reasoning</li>
+                  <li>tool_calls</li>
+                  <li>attributions</li>
+                  <li>pipeline_steps</li>
+                </ul>
+              </div>
+
+              <div class="arch-arrow">→</div>
+
+              <!-- ORCHESTRATOR -->
+              <div class="arch-box arch-orchestrator">
+                <div class="arch-title">LLMEvaluator</div>
+                <ul class="arch-desc">
+                  <li>Selects applicable metrics per request</li>
+                  <li>Aggregates scores</li>
+                  <li>Returns EvalReport</li>
+                </ul>
+              </div>
+
+              <div class="arch-arrow">
+                <span class="arch-mult">×5</span>→
+              </div>
+
+              <!-- METRICS column -->
+              <div class="arch-metric-col">
+                <div class="arch-metric"><div class="arch-metric-name">Cascade Uncertainty</div><div class="arch-metric-fm">FM-1</div></div>
+                <div class="arch-metric"><div class="arch-metric-name">Tool Reliability</div><div class="arch-metric-fm">FM-2, FM-6</div></div>
+                <div class="arch-metric"><div class="arch-metric-name">Distribution Health</div><div class="arch-metric-fm">FM-3, FM-7</div></div>
+                <div class="arch-metric"><div class="arch-metric-name">Explanation Validity</div><div class="arch-metric-fm">FM-5</div></div>
+                <div class="arch-metric"><div class="arch-metric-name">Cross-Surface Consistency</div><div class="arch-metric-fm">FM-4</div></div>
+              </div>
+
+              <div class="arch-arrow">→</div>
+
+              <!-- METRIC RESULT -->
+              <div class="arch-box arch-result">
+                <div class="arch-title">MetricResult</div>
+                <ul class="arch-fields">
+                  <li>score · confidence</li>
+                  <li>latency_ms · passed</li>
+                  <li>metadata (structured)</li>
+                </ul>
+              </div>
+
+              <div class="arch-arrow">→</div>
+
+              <!-- OUTPUT -->
+              <div class="arch-box arch-output">
+                <div class="arch-title">EvalReport</div>
+                <ul class="arch-fields">
+                  <li>overall_score</li>
+                  <li>passed (bool)</li>
+                  <li>per-dimension scores</li>
+                  <li>latency_ms</li>
+                  <li>CI threshold check</li>
+                </ul>
+              </div>
+            </div>
+          </div>
 
         </div>
       </div>
