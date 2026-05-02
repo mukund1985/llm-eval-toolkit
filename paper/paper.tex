@@ -736,14 +736,16 @@ observability stack.
     font=\footnotesize,
     >={Latex[length=2mm,width=1.5mm]},
     every node/.style={align=center},
+    % Width is set relative to the actual line width so it never overflows.
     bigbox/.style={rectangle, rounded corners=3pt, draw, line width=0.7pt,
-                   inner sep=6pt, text width=12.6cm, font=\footnotesize},
+                   inner sep=5pt, text width=\dimexpr\linewidth-0.8cm\relax,
+                   font=\footnotesize},
     inputbox/.style={bigbox, fill=blue!8, draw=blue!55, align=left},
     orchbox/.style={bigbox, fill=green!8, draw=green!55!black, align=center},
     resultbox/.style={bigbox, fill=violet!10, draw=violet!55, align=center},
     outputbox/.style={bigbox, fill=red!8, draw=red!55, align=left},
     metricbox/.style={rectangle, rounded corners=3pt, draw=orange!65, line width=0.6pt,
-                      fill=yellow!22, inner sep=4pt, text width=2.05cm,
+                      fill=yellow!22, inner sep=3pt, text width=1.85cm,
                       minimum height=1.3cm, font=\scriptsize, align=center},
     arrow/.style={->, line width=0.8pt, draw=gray!75}
   ]
@@ -761,13 +763,14 @@ observability stack.
       Selects applicable metrics per request \;\textbar\; Runs in parallel \;\textbar\;
       Aggregates scores \;\textbar\; Returns EvalReport};
 
-    % 5 metric cards, centred horizontally below the orchestrator
-    \node[metricbox, below=0.85cm of orch.south, anchor=north, xshift=-4.6cm] (m1)
-      {{\paefhead Cascade}\\{\paefhead Uncertainty}\\[1pt]\textcolor{gray!75}{FM-1}};
-    \node[metricbox, right=0.15cm of m1] (m2)
-      {{\paefhead Tool}\\{\paefhead Reliability}\\[1pt]\textcolor{gray!75}{FM-2, FM-6}};
-    \node[metricbox, right=0.15cm of m2] (m3)
+    % 5 metric cards, anchored from the centre (m3) so the row is symmetric
+    % under the orchestrator and never overflows the linewidth.
+    \node[metricbox, below=0.85cm of orch.south] (m3)
       {{\paefhead Distribution}\\{\paefhead Health}\\[1pt]\textcolor{gray!75}{FM-3, FM-7}};
+    \node[metricbox, left=0.15cm of m3] (m2)
+      {{\paefhead Tool}\\{\paefhead Reliability}\\[1pt]\textcolor{gray!75}{FM-2, FM-6}};
+    \node[metricbox, left=0.15cm of m2] (m1)
+      {{\paefhead Cascade}\\{\paefhead Uncertainty}\\[1pt]\textcolor{gray!75}{FM-1}};
     \node[metricbox, right=0.15cm of m3] (m4)
       {{\paefhead Explanation}\\{\paefhead Validity}\\[1pt]\textcolor{gray!75}{FM-5}};
     \node[metricbox, right=0.15cm of m4] (m5)
